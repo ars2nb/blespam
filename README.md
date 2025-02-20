@@ -33,4 +33,6 @@ install Android Studio on your PC
 
 # Upload clone repository in projects:
 Transfer files from the downloaded repository to projects to work in the application 
-``` 
+```
+## Social Network
+[Telegram](https://t.me/blespam)
