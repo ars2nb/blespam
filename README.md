@@ -18,9 +18,9 @@ This application was developed based on the build from [tutozz](https://github.c
 
 ## 🛠 Features / Особенности
 
-- Cross-platform support / Кроссплатформенность
-- Multiple device emulation / Эмуляция нескольких устройств
-- Simple and intuitive interface / Простой и интуитивный интерфейс
+- Low latency between requests / Низкая задержка между запросами
+- Beautiful and user-friendly interface / Красивый и удобный интерфейс
+- Added a lot of pop-ups / добавлено много всплывающих окон
 
 ## 📦 Installation / Установка
 
