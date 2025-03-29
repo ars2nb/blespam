@@ -1,38 +1,68 @@
-# BLE Spam Tool 🔵📱💻
+# BLE Spammer App 📡
+![Logo](./assets/icon.png)
 
-## 🇺🇸 English Description
+## Overview 📋
+🕵️‍♂️ Based on the work of [Willy-JL](https://github.com/Willy-JL), [Spooks4576](https://github.com/Spooks4576), and [ECTO-1A](https://github.com/ECTO-1A), this Android app extends the capabilities of the Flipper Zero BLE Spam tool, enabling protocol spoofing across a wide range of devices and operating systems. It currently supports Apple Continuity Protocol, Google Fast Pair Protocol, Samsung EasySetup Protocol, and Microsoft SwiftPair Protocol.
 
-This application was developed based on the build from [tutozz](https://github.com/tutozz/ble-spam-android) but has been updated with the following improvements:
+## Key Features 🔑
+### Apple Continuity Protocol Spoofing 🍏
+- Spoof Nearby Actions Modals and Proximity Pair Popup on iOS and iPadOS devices.
+- Trigger system crashes on iOS 17 (iPhone 12 or newer), leading to a reboot.
 
-- Added new device support
-- Enhanced Windows compatibility
-- Improved overall functionality
+### Google Fast Pair Protocol Spoofing 🤖
+- Emulate Google Fast Pair Protocol, compatible with most modern Android phones.
+- More than 195 different devices spoofed.
 
-## 🇷🇺 Русское описание
+### Samsung EasySetup Protocol Spoofing 📲
+- Mimic the Samsung EasySetup Protocol for Buds and Watch devices.
+- The most effective way for Android, the target phone/tablet is literally unusable while activated.
 
-Данное приложение было сделано на основе билда от [tutozz](https://github.com/tutozz/ble-spam-android), но было обновлено и дополнено:
+### Microsoft SwiftPair Protocol Spoofing 💻
+- Spoof Microsoft's SwiftPair Protocol, simplifying device pairing on Windows.
+- Spoof devices with the name of your choice.
 
-- Добавлены новые устройства
-- Реализована работа в Windows
-- Улучшена общая функциональность
+## Requirements 📦
+- Android 8.0 (API level 26) or later
 
-## 🛠 Features / Особенности
+## Installation 🚀
+Get started with the BLE Spammer App through two simple methods:
 
-- Low latency between requests / Низкая задержка между запросами
-- Beautiful and user-friendly interface / Красивый и удобный интерфейс
-- Added a lot of pop-ups / добавлено много всплывающих окон
+### Prebuilt APK (Recommended) 📦
+- Download the prebuilt and signed APK from the [Release section](#).
 
-## 📦 Installation / Установка
+### Building from Source 🛠️
+- Clone this repository and open it in Android Studio.
+- Compile the app to create a customized APK.
 
-```bash
-# Clone the repository
-git clone https://github.com/ars2nb/blespam
+## Usage 🚀
+Experiment with BLE protocol spoofing like a pro:
 
-# Install Android Studio
-install Android Studio on your PC
+1. Launch the app.
+2. Configure the delay between each packet (recommended: 500ms or 1000ms).
+3. Select the protocol you want to spoof from the available options.
 
-# Upload clone repository in projects:
-Transfer files from the downloaded repository to projects to work in the application 
-```
-## Social Network
-[Telegram](https://t.me/blespam)
+**Note**: Combine multiple protocols for ultimate flexibility (performance may be affected).
+
+## Customization 🛠️
+While the current version offers packet delay customization, future updates promise even more fine-tuned options. 🚀 Developers and contributors are invited to expand the realm of BLE protocol spoofing and uncover its hidden intricacies.
+
+## Known Limitations ⚠️
+Here's what you should know:
+
+- Restricted to the device's internal Bluetooth antenna, leading to a limited operational range.
+- Hardware limitations might affect range, speed, and effectiveness.
+
+
+## Screenshots 📸
+Here are some screenshots of the app in action:
+
+![Screenshot 1 - Home](./assets/Screenshot_1.jpg)
+![Screenshot 2 - 2000ms Full Android Scope](./assets/Screenshot_2.jpg)
+![Screenshot 3 - 20ms Windows/Samsung/iOS 17 Crash](./assets/Screenshot_3.jpg)
+
+**Caution**: This repository serves educational purposes exclusively. The maintainers are not responsible for any misuse or consequences arising from the application of this code.
+
+---
+**Disclaimer**: Comply with the applicable laws and regulations while using this app. Unlawful or improper use may lead to severe legal consequences.
+
+Your expertise and contributions are instrumental in shaping the future of BLE protocol exploration. Let's push the boundaries of this fascinating technology together! 🌐🔍
