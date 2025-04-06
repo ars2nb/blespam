@@ -43,7 +43,4 @@
     <string name="minus">-</string>
     <string name="blink_indicator">Blink Indicator</string>
     <string name="_20ms">20ms</string>
-    <string name="update_message">You will need to update the app to continue.</string>
-    <string name="update_button">UPDATE</string>
-    <string name="version">v2.3</string>
 </resources>
