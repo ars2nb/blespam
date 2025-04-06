@@ -37,10 +37,13 @@
     </string>
     <string name="thanks_to_willy_jl_spooks4576_and_ecto_1a">Thanks to @Willy-JL, @Spooks4576,
         @ECTO-1A</string>
-    <string name="dev_by_tutozz_and_ars3nb">Dev by @tutozz, @ars3nb</string>
+    <string name="dev_by_tutozz_and_ars3nb">Dev by @tutozz, @ars3nb(@ars2nb)</string>
     <string name="todo">TODO</string>
     <string name="plus">+</string>
     <string name="minus">-</string>
     <string name="blink_indicator">Blink Indicator</string>
-    <string name="_50ms">50ms</string>
+    <string name="_20ms">20ms</string>
+    <string name="update_message">You will need to update the app to continue.</string>
+    <string name="update_button">UPDATE</string>
+    <string name="version">v2.1</string>
 </resources>

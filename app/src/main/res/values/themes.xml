@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.BLESpam" parent="Theme.MaterialComponents.Light.NoActionBar">
+    <style name="Theme.BLESpam" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorPrimary">#F9772F</item>
         <item name="colorPrimaryVariant">#A14B1C</item>
         <item name="colorOnPrimary">@color/white</item>

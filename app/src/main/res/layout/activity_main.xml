@@ -319,7 +319,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="15sp"
-                android:text="50ms" />
+                android:text="20ms" />
 
             <Button
                 android:id="@+id/plusDelayButton"
