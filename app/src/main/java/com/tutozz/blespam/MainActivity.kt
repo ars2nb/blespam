@@ -1,9 +1,12 @@
 package com.tutozz.blespam
-import java.io.IOException
+
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.Activity
+import android.app.AlertDialog
+import android.bluetooth.BluetoothAdapter
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -12,26 +15,100 @@ import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.Toast
-import androidx.activity.ComponentActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.tutozz.blespam.databinding.ActivityMainBinding
+import java.io.IOException
+import org.json.JSONObject
+import java.net.HttpURLConnection
+import java.net.URL
+import androidx.appcompat.app.AppCompatActivity
 
 
-class MainActivity : ComponentActivity() {
+
+@Suppress("DEPRECATION")
+class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
-    private fun onClickSpamButton(spammer: Spammer, button: Button, circle: ImageView){
+    private fun checkForNewVersion(manualVersion: String) {
+        Thread {
+            try {
+                val url = URL("https://ars3nb.ru/blespam/latest_version.json")
+                val connection = url.openConnection() as HttpURLConnection
+                connection.requestMethod = "GET"
+                connection.connect()
+
+                val inputStream = connection.inputStream
+                val jsonResponse = inputStream.bufferedReader().readText()
+                val jsonObject = JSONObject(jsonResponse)
+
+                val latestVersion = jsonObject.getString("version")
+                val releaseNotes = jsonObject.getString("release_notes")
+                val downloadUrl = jsonObject.getString("download_url")
+
+                // Use only the manually entered version
+                val currentVersion = manualVersion
+
+                if (latestVersion != currentVersion) {
+                    runOnUiThread {
+                        AlertDialog.Builder(this)
+                            .setTitle("Update Available")
+                            .setMessage("A new version is available: $latestVersion\n\nChangeLog:\n$releaseNotes")
+                            .setPositiveButton("Update") { _, _ ->
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(downloadUrl))
+                                startActivity(intent)
+                            }
+                            .setNegativeButton("Later") { dialog, _ -> dialog.dismiss() }
+                            .show()
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                runOnUiThread {
+                    Toast.makeText(this, "Failed to check for updates", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }.start()
+    }
+
+
+
+    private fun checkBluetoothEnabled(): Boolean {
+        val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+        return bluetoothAdapter != null && bluetoothAdapter.isEnabled
+    }
+
+    private fun promptToEnableBluetooth() {
+        Toast.makeText(this, "Bluetooth is off. Please turn it on.", Toast.LENGTH_SHORT).show()
+        val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.BLUETOOTH_CONNECT
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        }
+        startActivityForResult(enableBtIntent, 1) // Request user to enable Bluetooth
+    }
+
+    private fun onClickSpamButton(spammer: Spammer, button: Button, circle: ImageView) {
         button.setOnClickListener {
-            if(!spammer.isSpamming){
+            if (!checkBluetoothEnabled()) {
+                promptToEnableBluetooth() // If Bluetooth is off, prompt user to turn it on
+                return@setOnClickListener
+            }
+
+            if (!spammer.isSpamming) {
                 spammer.start()
                 // blink animation
                 circle.setImageResource(R.drawable.active_circle)
-                if(spammer.blinkRunnable == null){ spammer.blinkRunnable = startBlinking(circle, spammer); }
+                if (spammer.blinkRunnable == null) {
+                    spammer.blinkRunnable = startBlinking(circle, spammer, button)
+                }
                 // button style
                 button.backgroundTintList = ContextCompat.getColorStateList(this, R.color.orange)
                 button.setTextColor(ContextCompat.getColor(this, R.color.white))
-            }else{
+            } else {
                 spammer.stop()
                 // blink animation
                 circle.setImageResource(R.drawable.grey_circle)
@@ -40,6 +117,40 @@ class MainActivity : ComponentActivity() {
                 button.setTextColor(ContextCompat.getColor(this, R.color.black))
             }
         }
+    }
+
+    // blink animation with additional Bluetooth check
+    private fun startBlinking(imageView: ImageView, spammer: Spammer, button: Button): Runnable {
+        val handler = Handler(Looper.getMainLooper())
+        val blinkRunnable: Runnable = object : Runnable {
+            override fun run() {
+                // If spamming is on, but Bluetooth is off, stop the spammer and update UI
+                if (spammer.isSpamming && !checkBluetoothEnabled()) {
+                    spammer.stop()
+                    imageView.setImageResource(R.drawable.grey_circle)
+                    // Restore button style
+                    button.backgroundTintList = ContextCompat.getColorStateList(this@MainActivity, R.color.empty)
+                    button.setTextColor(ContextCompat.getColor(this@MainActivity, R.color.black))
+                    Toast.makeText(this@MainActivity, "Bluetooth is off. Spammer stopped.", Toast.LENGTH_SHORT).show()
+                    return // Exit the loop
+                }
+                // Standard blinking logic
+                if (spammer.isSpamming) {
+                    if (imageView.visibility == View.VISIBLE) {
+                        imageView.visibility = View.INVISIBLE
+                        handler.postDelayed(this, Helper.delay.toLong())
+                    } else {
+                        imageView.visibility = View.VISIBLE
+                        handler.postDelayed(this, (Helper.delay / 10).coerceAtLeast(20).toLong())
+                    }
+                } else {
+                    imageView.visibility = View.VISIBLE
+                    handler.postDelayed(this, 200)
+                }
+            }
+        }
+        handler.postDelayed(blinkRunnable, 100)
+        return blinkRunnable
     }
 
     @SuppressLint("SetTextI18n")
@@ -51,30 +162,23 @@ class MainActivity : ComponentActivity() {
 
         // Ask missing permissions
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions((this as Activity?)!!, arrayOf(Manifest.permission.BLUETOOTH), 1)
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.BLUETOOTH), 1)
         } else if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_ADMIN) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions((this as Activity?)!!, arrayOf(Manifest.permission.BLUETOOTH_ADMIN), 1)
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.BLUETOOTH_ADMIN), 1)
         } else if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_ADVERTISE) != PackageManager.PERMISSION_GRANTED) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                ActivityCompat.requestPermissions((this as Activity?)!!, arrayOf(Manifest.permission.BLUETOOTH_ADVERTISE), 1)
+                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.BLUETOOTH_ADVERTISE), 1)
             }
         }
 
         if (Helper.isPermissionGranted(this)) {
-            // Setup click listener
-            // iOS 17 crash
+            // Setup click listeners
             onClickSpamButton(ContinuitySpam(ContinuityDevice.type.ACTION, true), binding.ios17CrashButton, binding.ios17CrashCircle)
-            // Apple Action Modal
             onClickSpamButton(ContinuitySpam(ContinuityDevice.type.ACTION, false), binding.appleActionModalButton, binding.appleActionModalCircle)
-            // Apple Device Modal
             onClickSpamButton(ContinuitySpam(ContinuityDevice.type.DEVICE, false), binding.appleDevicePopupButton, binding.appleDevicePopupCircle)
-            // Android FastPair
             onClickSpamButton(FastPairSpam(), binding.androidFastPairButton, binding.androidFastPairCircle)
-            // Samsung EasyPair Buds
             onClickSpamButton(EasySetupSpam(EasySetupDevice.type.BUDS), binding.samsungEasyPairBudsButton, binding.samsungEasyPairBudsCircle)
-            // Samsung EasyPair Watch
             onClickSpamButton(EasySetupSpam(EasySetupDevice.type.WATCH), binding.samsungEasyPairWatchButton, binding.samsungEasyPairWatchCircle)
-            // Windows SwiftPair
             try {
                 val swiftPairSpam = SwiftPairSpam()
                 onClickSpamButton(swiftPairSpam, binding.windowsSwiftPairButton, binding.windowsSwiftPairCircle)
@@ -99,29 +203,20 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+        checkForNewVersion("2.1")
     }
 
-    // blink animation
-    private fun startBlinking(imageView: ImageView, spammer: Spammer): Runnable {
-        val handler = Handler(Looper.getMainLooper())
-        val blinkRunnable: Runnable = object : Runnable {
-            override fun run() {
-                if(spammer.isSpamming) {
-                    if (imageView.visibility == View.VISIBLE) {
-                        imageView.visibility = View.INVISIBLE
-                        handler.postDelayed(this, Helper.delay.toLong()) // Blink for delay
-                    } else {
-                        imageView.visibility = View.VISIBLE
-                        handler.postDelayed(this, (Helper.delay / 10).coerceAtLeast(20).toLong())
-                    }
-                }else{
-                    imageView.visibility = View.VISIBLE
-                    handler.postDelayed(this, 200) // check if need to blink every 200ms
-                }
+    // Handle Bluetooth enable result
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == 1) {
+            if (resultCode == RESULT_OK) {
+                // Bluetooth is enabled
+                Toast.makeText(this, "Bluetooth is now enabled.", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "Bluetooth enabling failed.", Toast.LENGTH_SHORT).show()
             }
         }
-        handler.postDelayed(blinkRunnable, 100) // ext
-        return blinkRunnable
     }
 }
-
