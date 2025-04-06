@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothAdapter
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -28,14 +29,10 @@ import androidx.appcompat.app.AppCompatActivity
 @Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
-    var betaModeEnabled = false
-    var logoClickCount = 0
-    val logoClickResetDelay = 1000L
     object AppVersion {
-        const val release = "2.2"
-        const val beta = "2.2-beta"
+        const val release = "2.3"
+        const val beta = "2.3-beta"
     }
-
 
     private fun checkForNewVersion(currentVersion: String, isBeta: Boolean) {
         Thread {
@@ -43,7 +40,7 @@ class MainActivity : AppCompatActivity() {
                 val url = if (isBeta) {
                     URL("https://example.com/beta.json")
                 } else {
-                    URL("https://example.com/latest.json")
+                    URL("hhttps://example.com/main.json")
                 }
 
                 val connection = url.openConnection() as HttpURLConnection
@@ -118,7 +115,6 @@ class MainActivity : AppCompatActivity() {
         }
         return false
     }
-
 
 
 
@@ -209,14 +205,27 @@ class MainActivity : AppCompatActivity() {
         val view = binding.root
         setContentView(view)
 
+        // Ask missing permissions
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.BLUETOOTH), 1)
+        } else if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_ADMIN) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.BLUETOOTH_ADMIN), 1)
+        } else if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_ADVERTISE) != PackageManager.PERMISSION_GRANTED) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.BLUETOOTH_ADVERTISE), 1)
+            }
+        }
+
         val prefs = getSharedPreferences("settings", MODE_PRIVATE)
         var betaModeEnabled = prefs.getBoolean("beta_mode", false)
 
+        // Проверка версии приложения
         checkForNewVersion(AppVersion.beta, betaModeEnabled)
 
         var logoClickCount = 0
         val logoClickResetDelay = 1000L
 
+        // Обработчик кликов на логотип
         if (!betaModeEnabled) {
             binding.logo.setOnClickListener {
                 logoClickCount++
@@ -224,6 +233,7 @@ class MainActivity : AppCompatActivity() {
                     logoClickCount = 0
                 }, logoClickResetDelay)
 
+                // Включение бета-режима
                 if (logoClickCount >= 3) {
                     betaModeEnabled = true
                     prefs.edit().putBoolean("beta_mode", true).apply()
@@ -234,40 +244,55 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+// Проверка наличия разрешений
         if (Helper.isPermissionGranted(this)) {
+            // Инициализация кнопок для спама
+            initializeSpamButtons()
+
+            // Установка обработчиков для изменения задержки
+            setupDelayButtons()
+        }
+
+
+        checkForNewVersion(AppVersion.release, isBeta = false)
+    }
+
+    // Метод для инициализации кнопок спама
+    private fun initializeSpamButtons() {
+        try {
             onClickSpamButton(ContinuitySpam(ContinuityDevice.type.ACTION, true), binding.ios17CrashButton, binding.ios17CrashCircle)
             onClickSpamButton(ContinuitySpam(ContinuityDevice.type.ACTION, false), binding.appleActionModalButton, binding.appleActionModalCircle)
             onClickSpamButton(ContinuitySpam(ContinuityDevice.type.DEVICE, false), binding.appleDevicePopupButton, binding.appleDevicePopupCircle)
             onClickSpamButton(FastPairSpam(), binding.androidFastPairButton, binding.androidFastPairCircle)
             onClickSpamButton(EasySetupSpam(EasySetupDevice.type.BUDS), binding.samsungEasyPairBudsButton, binding.samsungEasyPairBudsCircle)
             onClickSpamButton(EasySetupSpam(EasySetupDevice.type.WATCH), binding.samsungEasyPairWatchButton, binding.samsungEasyPairWatchCircle)
-            try {
-                val swiftPairSpam = SwiftPairSpam()
-                onClickSpamButton(swiftPairSpam, binding.windowsSwiftPairButton, binding.windowsSwiftPairCircle)
-            } catch (e: IOException) {
-                Toast.makeText(this, "Failed to initialize SwiftPairSpam", Toast.LENGTH_SHORT).show()
-                e.printStackTrace()
-            }
 
-            binding.minusDelayButton.setOnClickListener {
-                val i = Helper.delays.indexOf(Helper.delay)
-                if (i > 0) {
-                    Helper.delay = Helper.delays[i - 1]
-                    binding.delayText.text = Helper.delay.toString() + "ms"
-                }
-            }
-            binding.plusDelayButton.setOnClickListener {
-                val i = Helper.delays.indexOf(Helper.delay)
-                if (i < Helper.delays.size - 1) {
-                    Helper.delay = Helper.delays[i + 1]
-                    binding.delayText.text = Helper.delay.toString() + "ms"
-                }
-            }
+            val swiftPairSpam = SwiftPairSpam()
+            onClickSpamButton(swiftPairSpam, binding.windowsSwiftPairButton, binding.windowsSwiftPairCircle)
+        } catch (e: IOException) {
+            Toast.makeText(this, "Failed to initialize SwiftPairSpam", Toast.LENGTH_SHORT).show()
+            e.printStackTrace()
         }
-        checkForNewVersion(AppVersion.release, isBeta = false)
     }
 
+    // Метод для настройки кнопок изменения задержки
+    private fun setupDelayButtons() {
+        binding.minusDelayButton.setOnClickListener {
+            val i = Helper.delays.indexOf(Helper.delay)
+            if (i > 0) {
+                Helper.delay = Helper.delays[i - 1]
+                binding.delayText.text = "${Helper.delay}ms"
+            }
+        }
 
+        binding.plusDelayButton.setOnClickListener {
+            val i = Helper.delays.indexOf(Helper.delay)
+            if (i < Helper.delays.size - 1) {
+                Helper.delay = Helper.delays[i + 1]
+                binding.delayText.text = "${Helper.delay}ms"
+            }
+        }
+    }
 
 
     // Handle Bluetooth enable result
