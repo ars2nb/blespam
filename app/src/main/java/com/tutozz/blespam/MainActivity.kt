@@ -33,7 +33,7 @@ class MainActivity : AppCompatActivity() {
     private fun checkForNewVersion(manualVersion: String) {
         Thread {
             try {
-                val url = URL("https://ars3nb.ru/blespam/latest_version.json")
+                val url = URL("https://example.com/main.json")
                 val connection = url.openConnection() as HttpURLConnection
                 connection.requestMethod = "GET"
                 connection.connect()
