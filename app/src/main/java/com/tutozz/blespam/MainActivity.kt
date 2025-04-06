@@ -7,7 +7,6 @@ import android.bluetooth.BluetoothAdapter
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -29,11 +28,24 @@ import androidx.appcompat.app.AppCompatActivity
 @Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
+    var betaModeEnabled = false
+    var logoClickCount = 0
+    val logoClickResetDelay = 1000L
+    object AppVersion {
+        const val release = "2.2"
+        const val beta = "2.2-beta"
+    }
 
-    private fun checkForNewVersion(manualVersion: String) {
+
+    private fun checkForNewVersion(currentVersion: String, isBeta: Boolean) {
         Thread {
             try {
-                val url = URL("https://example.com/main.json")
+                val url = if (isBeta) {
+                    URL("https://example.com/beta.json")
+                } else {
+                    URL("https://example.com/latest.json")
+                }
+
                 val connection = url.openConnection() as HttpURLConnection
                 connection.requestMethod = "GET"
                 connection.connect()
@@ -45,23 +57,38 @@ class MainActivity : AppCompatActivity() {
                 val latestVersion = jsonObject.getString("version")
                 val releaseNotes = jsonObject.getString("release_notes")
                 val downloadUrl = jsonObject.getString("download_url")
+                val minSupportedVersion = jsonObject.optString("min_supported_version", "0.0")
 
-                // Use only the manually entered version
-                val currentVersion = manualVersion
-
-                if (latestVersion != currentVersion) {
-                    runOnUiThread {
-                        AlertDialog.Builder(this)
-                            .setTitle("Update Available")
-                            .setMessage("A new version is available: $latestVersion\n\nChangeLog:\n$releaseNotes")
-                            .setPositiveButton("Update") { _, _ ->
-                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(downloadUrl))
-                                startActivity(intent)
-                            }
-                            .setNegativeButton("Later") { dialog, _ -> dialog.dismiss() }
-                            .show()
+                runOnUiThread {
+                    when {
+                        isVersionNewer(minSupportedVersion, currentVersion) -> {
+                            // Forced update
+                            AlertDialog.Builder(this)
+                                .setTitle("Update Required")
+                                .setMessage("Your version is outdated. Please update to $latestVersion\n\nWhat's New:\n$releaseNotes")
+                                .setCancelable(false)
+                                .setPositiveButton("Update") { _, _ ->
+                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(downloadUrl))
+                                    startActivity(intent)
+                                    finish()
+                                }
+                                .show()
+                        }
+                        isVersionNewer(latestVersion, currentVersion) -> {
+                            // Regular update
+                            AlertDialog.Builder(this)
+                                .setTitle("Update Available (${if (isBeta) "Beta" else "Release"})")
+                                .setMessage("New version: $latestVersion\n\nWhat's New:\n$releaseNotes")
+                                .setPositiveButton("Update") { _, _ ->
+                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(downloadUrl))
+                                    startActivity(intent)
+                                }
+                                .setNegativeButton("Later") { dialog, _ -> dialog.dismiss() }
+                                .show()
+                        }
                     }
                 }
+
             } catch (e: Exception) {
                 e.printStackTrace()
                 runOnUiThread {
@@ -70,6 +97,28 @@ class MainActivity : AppCompatActivity() {
             }
         }.start()
     }
+
+
+
+    private fun isVersionNewer(newVersion: String, currentVersion: String): Boolean {
+        fun normalize(v: String) = v.replace("[^\\d.]".toRegex(), "")
+            .split(".")
+            .mapNotNull { it.toIntOrNull() }
+
+        val newParts = normalize(newVersion)
+        val currParts = normalize(currentVersion)
+
+        val maxLength = maxOf(newParts.size, currParts.size)
+        val paddedNew = newParts + List(maxLength - newParts.size) { 0 }
+        val paddedCurr = currParts + List(maxLength - currParts.size) { 0 }
+
+        for (i in 0 until maxLength) {
+            if (paddedNew[i] > paddedCurr[i]) return true
+            if (paddedNew[i] < paddedCurr[i]) return false
+        }
+        return false
+    }
+
 
 
 
@@ -160,19 +209,32 @@ class MainActivity : AppCompatActivity() {
         val view = binding.root
         setContentView(view)
 
-        // Ask missing permissions
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.BLUETOOTH), 1)
-        } else if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_ADMIN) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.BLUETOOTH_ADMIN), 1)
-        } else if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_ADVERTISE) != PackageManager.PERMISSION_GRANTED) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.BLUETOOTH_ADVERTISE), 1)
+        val prefs = getSharedPreferences("settings", MODE_PRIVATE)
+        var betaModeEnabled = prefs.getBoolean("beta_mode", false)
+
+        checkForNewVersion(AppVersion.beta, betaModeEnabled)
+
+        var logoClickCount = 0
+        val logoClickResetDelay = 1000L
+
+        if (!betaModeEnabled) {
+            binding.logo.setOnClickListener {
+                logoClickCount++
+                Handler(Looper.getMainLooper()).postDelayed({
+                    logoClickCount = 0
+                }, logoClickResetDelay)
+
+                if (logoClickCount >= 3) {
+                    betaModeEnabled = true
+                    prefs.edit().putBoolean("beta_mode", true).apply()
+                    logoClickCount = 0
+                    Toast.makeText(this, "Beta mode ON", Toast.LENGTH_SHORT).show()
+                    checkForNewVersion(AppVersion.beta, isBeta = true)
+                }
             }
         }
 
         if (Helper.isPermissionGranted(this)) {
-            // Setup click listeners
             onClickSpamButton(ContinuitySpam(ContinuityDevice.type.ACTION, true), binding.ios17CrashButton, binding.ios17CrashCircle)
             onClickSpamButton(ContinuitySpam(ContinuityDevice.type.ACTION, false), binding.appleActionModalButton, binding.appleActionModalCircle)
             onClickSpamButton(ContinuitySpam(ContinuityDevice.type.DEVICE, false), binding.appleDevicePopupButton, binding.appleDevicePopupCircle)
@@ -187,7 +249,6 @@ class MainActivity : AppCompatActivity() {
                 e.printStackTrace()
             }
 
-            // Delay Buttons onClick
             binding.minusDelayButton.setOnClickListener {
                 val i = Helper.delays.indexOf(Helper.delay)
                 if (i > 0) {
@@ -203,8 +264,11 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-        checkForNewVersion("2.1")
+        checkForNewVersion(AppVersion.release, isBeta = false)
     }
+
+
+
 
     // Handle Bluetooth enable result
     @Deprecated("Deprecated in Java")
