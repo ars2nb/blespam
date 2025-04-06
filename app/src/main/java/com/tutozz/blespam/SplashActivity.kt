@@ -23,7 +23,7 @@ class SplashActivity : AppCompatActivity() {
             .load(R.drawable.anim)
             .into(gifImageView)
 
-        val version = "v2.1 by ars2nb"
+        val version = "v2.3 by ars2nb"
         versionTextView.text = version
 
         Handler().postDelayed({
