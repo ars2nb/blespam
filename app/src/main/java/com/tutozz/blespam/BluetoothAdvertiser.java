@@ -55,10 +55,10 @@ public class BluetoothAdvertiser {
 
     @SuppressLint("MissingPermission")
     public void advertise(AdvertiseData data, AdvertiseData scanResponse) {
-        if(ready){
+        if (ready) {
             mBluetoothLeAdvertiser.startAdvertising(settings, data, scanResponse, advertiseCallback);
-        }else{
-            System.out.println("Failed: Not Ready");
+        } else {
+            System.out.println("@string/ba_failed");
         }
     }
 
@@ -66,9 +66,10 @@ public class BluetoothAdvertiser {
     public void stopAdvertising() {
         if (mBluetoothLeAdvertiser != null && advertiseCallback != null) {
             mBluetoothLeAdvertiser.stopAdvertising(advertiseCallback);
-            System.out.println("Advertising stopped");
+            System.out.println("@string/ba_astop");
         }
     }
+
 
 
 }
