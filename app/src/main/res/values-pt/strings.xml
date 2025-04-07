@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">
+        <b>BLE Spam</b>
+    </string>
+        <string name="permission_granted">Permissão concedida</string>
+        <string name="permission_required">Permissão necessária</string>
+        <string name="ok">OK</string>
+    <string name="samsung_easypair_watch">
+        <b>Samsung EasyPair Watch</b>
+    </string>
+    <string name="windows_swiftpair">
+        <b>Windows SwiftPair</b>
+    </string>
+    <string name="samsung_easypair_buds">
+        <b>Samsung EasyPair Buds</b>
+    </string>
+    <string name="android_fastpair">
+        <b>Android FastPair</b>
+    </string>
+    <string name="apple_device_popup">
+        <b>Apple Device Popup</b>
+    </string>
+    <string name="apple_action_modal">
+        <b>Apple Action Modal</b>
+    </string>
+    <string name="ios_17_crash">
+        <b>iOS 17 Crash</b>
+    </string>
+    <string name="ios_title">
+        <b>iOS</b>
+    </string>
+    <string name="android_title">
+        <b>Android and Samsung</b>
+    </string>
+    <string name="windows_title">
+        <b>Windows</b>
+    </string>
+        <string name="thanks_to_willy_jl_spooks4576_and_ecto_1a">Agradecimentos a @Willy-JL, @Spooks4576, @ECTO-1A</string>
+        <string name="dev_by_tutozz_and_ars3nb">Desenvolvido por @tutozz, @ars3nb(@ars2nb)</string>
+        <string name="todo">AFAZER</string>
+        <string name="plus">+</string>
+        <string name="minus">-</string>
+        <string name="blink_indicator">Indicador de Piscar</string>
+        <string name="_20ms">20ms</string>
+        <string name="update_required_title">Atualização necessária</string>
+        <string name="update_available_title">Atualização disponível (%1$s)</string>
+        <string name="update_message">Sua versão está desatualizada. Por favor, atualize para %1$s\n\nNovidades:\n%2$s</string>
+        <string name="update_available_message">Nova versão: %1$s\n\nNovidades:\n%2$s</string>
+        <string name="update_button">Atualizar</string>
+        <string name="later_button">Mais tarde</string>
+        <string name="update_check_failed">Falha ao verificar atualizações</string>
+        <string name="update_type_beta">Beta</string>
+        <string name="update_type_release">Versão final</string>
+        <string name="bluetoothoff">Bluetooth está desligado. Por favor, ligue-o.</string>
+        <string name="bluetoothoff_spammeroff">Bluetooth está desligado. Spammer parado.</string>
+        <string name="betamodeon">Modo Beta ATIVADO</string>
+        <string name="swiftpair">Falha ao inicializar SwiftPairSpam</string>
+        <string name="bluetoothon">Bluetooth agora está habilitado.</string>
+        <string name="bluetootherror">Falha ao habilitar o Bluetooth.</string>
+        <string name="perscan">Permissão necessária para escanear dispositivos Bluetooth</string>
+        <string name="ba_failed">Falhou: Não está pronto</string>
+        <string name="ba_astop">Publicidade parada</string>
+</resources>
