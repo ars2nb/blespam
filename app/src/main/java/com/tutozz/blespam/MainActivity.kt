@@ -241,7 +241,7 @@ class MainActivity : AppCompatActivity() {
                     betaModeEnabled = true
                     prefs.edit().putBoolean("beta_mode", true).apply()
                     logoClickCount = 0
-                    Toast.makeText(this, "@string/betamodeon", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getString(R.string.betamodeon), Toast.LENGTH_SHORT).show()
                     checkForNewVersion(AppVersion.beta, isBeta = true)
                 }
             }
