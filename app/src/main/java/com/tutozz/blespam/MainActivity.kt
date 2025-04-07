@@ -29,9 +29,10 @@ import androidx.appcompat.app.AppCompatActivity
 @Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
+
     object AppVersion {
-        const val release = "2.3"
-        const val beta = "2.3-beta"
+        const val release = "2.4"
+        const val beta = "2.4-beta"
     }
 
     private fun checkForNewVersion(currentVersion: String, isBeta: Boolean) {
@@ -40,7 +41,7 @@ class MainActivity : AppCompatActivity() {
                 val url = if (isBeta) {
                     URL("https://example.com/beta.json")
                 } else {
-                    URL("hhttps://example.com/main.json")
+                    URL("https://example.com.main.json")
                 }
 
                 val connection = url.openConnection() as HttpURLConnection
@@ -61,10 +62,10 @@ class MainActivity : AppCompatActivity() {
                         isVersionNewer(minSupportedVersion, currentVersion) -> {
                             // Forced update
                             AlertDialog.Builder(this)
-                                .setTitle("Update Required")
-                                .setMessage("Your version is outdated. Please update to $latestVersion\n\nWhat's New:\n$releaseNotes")
+                                .setTitle(R.string.update_required_title)
+                                .setMessage(getString(R.string.update_message, latestVersion, releaseNotes))
                                 .setCancelable(false)
-                                .setPositiveButton("Update") { _, _ ->
+                                .setPositiveButton(R.string.update_button) { _, _ ->
                                     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(downloadUrl))
                                     startActivity(intent)
                                     finish()
@@ -73,14 +74,15 @@ class MainActivity : AppCompatActivity() {
                         }
                         isVersionNewer(latestVersion, currentVersion) -> {
                             // Regular update
+                            val updateType = if (isBeta) getString(R.string.update_type_beta) else getString(R.string.update_type_release)
                             AlertDialog.Builder(this)
-                                .setTitle("Update Available (${if (isBeta) "Beta" else "Release"})")
-                                .setMessage("New version: $latestVersion\n\nWhat's New:\n$releaseNotes")
-                                .setPositiveButton("Update") { _, _ ->
+                                .setTitle(getString(R.string.update_available_title, updateType))
+                                .setMessage(getString(R.string.update_available_message, latestVersion, releaseNotes))
+                                .setPositiveButton(R.string.update_button) { _, _ ->
                                     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(downloadUrl))
                                     startActivity(intent)
                                 }
-                                .setNegativeButton("Later") { dialog, _ -> dialog.dismiss() }
+                                .setNegativeButton(R.string.later_button) { dialog, _ -> dialog.dismiss() }
                                 .show()
                         }
                     }
@@ -89,12 +91,11 @@ class MainActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 e.printStackTrace()
                 runOnUiThread {
-                    Toast.makeText(this, "Failed to check for updates", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, R.string.update_check_failed, Toast.LENGTH_SHORT).show()
                 }
             }
         }.start()
     }
-
 
 
     private fun isVersionNewer(newVersion: String, currentVersion: String): Boolean {
@@ -124,45 +125,46 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun promptToEnableBluetooth() {
-        Toast.makeText(this, "Bluetooth is off. Please turn it on.", Toast.LENGTH_SHORT).show()
-        val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.BLUETOOTH_CONNECT
-            ) != PackageManager.PERMISSION_GRANTED
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT)
+            != PackageManager.PERMISSION_GRANTED
         ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.BLUETOOTH_CONNECT),
+                2
+            )
             return
         }
-        startActivityForResult(enableBtIntent, 1) // Request user to enable Bluetooth
+
+        val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+        startActivityForResult(enableBtIntent, 1)
     }
+
 
     private fun onClickSpamButton(spammer: Spammer, button: Button, circle: ImageView) {
         button.setOnClickListener {
             if (!checkBluetoothEnabled()) {
-                promptToEnableBluetooth() // If Bluetooth is off, prompt user to turn it on
+                promptToEnableBluetooth()
                 return@setOnClickListener
             }
 
             if (!spammer.isSpamming) {
                 spammer.start()
-                // blink animation
                 circle.setImageResource(R.drawable.active_circle)
                 if (spammer.blinkRunnable == null) {
                     spammer.blinkRunnable = startBlinking(circle, spammer, button)
                 }
-                // button style
                 button.backgroundTintList = ContextCompat.getColorStateList(this, R.color.orange)
                 button.setTextColor(ContextCompat.getColor(this, R.color.white))
             } else {
                 spammer.stop()
-                // blink animation
                 circle.setImageResource(R.drawable.grey_circle)
-                // button style restore
                 button.backgroundTintList = ContextCompat.getColorStateList(this, R.color.empty)
                 button.setTextColor(ContextCompat.getColor(this, R.color.black))
             }
         }
     }
+
 
     // blink animation with additional Bluetooth check
     private fun startBlinking(imageView: ImageView, spammer: Spammer, button: Button): Runnable {
@@ -176,7 +178,8 @@ class MainActivity : AppCompatActivity() {
                     // Restore button style
                     button.backgroundTintList = ContextCompat.getColorStateList(this@MainActivity, R.color.empty)
                     button.setTextColor(ContextCompat.getColor(this@MainActivity, R.color.black))
-                    Toast.makeText(this@MainActivity, "Bluetooth is off. Spammer stopped.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@MainActivity, getString(R.string.bluetoothoff_spammeroff), Toast.LENGTH_SHORT).show()
+
                     return // Exit the loop
                 }
                 // Standard blinking logic
@@ -219,13 +222,13 @@ class MainActivity : AppCompatActivity() {
         val prefs = getSharedPreferences("settings", MODE_PRIVATE)
         var betaModeEnabled = prefs.getBoolean("beta_mode", false)
 
-        // Проверка версии приложения
+        // Checking the application version
         checkForNewVersion(AppVersion.beta, betaModeEnabled)
 
         var logoClickCount = 0
         val logoClickResetDelay = 1000L
 
-        // Обработчик кликов на логотип
+        // Logo click handler
         if (!betaModeEnabled) {
             binding.logo.setOnClickListener {
                 logoClickCount++
@@ -233,23 +236,23 @@ class MainActivity : AppCompatActivity() {
                     logoClickCount = 0
                 }, logoClickResetDelay)
 
-                // Включение бета-режима
+                // Enabling beta mode
                 if (logoClickCount >= 3) {
                     betaModeEnabled = true
                     prefs.edit().putBoolean("beta_mode", true).apply()
                     logoClickCount = 0
-                    Toast.makeText(this, "Beta mode ON", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "@string/betamodeon", Toast.LENGTH_SHORT).show()
                     checkForNewVersion(AppVersion.beta, isBeta = true)
                 }
             }
         }
 
-// Проверка наличия разрешений
+// Verification of authorizations
         if (Helper.isPermissionGranted(this)) {
-            // Инициализация кнопок для спама
+            // Initialization of spam buttons
             initializeSpamButtons()
 
-            // Установка обработчиков для изменения задержки
+            // Setting handlers to change the delay
             setupDelayButtons()
         }
 
@@ -257,7 +260,7 @@ class MainActivity : AppCompatActivity() {
         checkForNewVersion(AppVersion.release, isBeta = false)
     }
 
-    // Метод для инициализации кнопок спама
+    // Method for initializing spam buttons
     private fun initializeSpamButtons() {
         try {
             onClickSpamButton(ContinuitySpam(ContinuityDevice.type.ACTION, true), binding.ios17CrashButton, binding.ios17CrashCircle)
@@ -270,12 +273,12 @@ class MainActivity : AppCompatActivity() {
             val swiftPairSpam = SwiftPairSpam()
             onClickSpamButton(swiftPairSpam, binding.windowsSwiftPairButton, binding.windowsSwiftPairCircle)
         } catch (e: IOException) {
-            Toast.makeText(this, "Failed to initialize SwiftPairSpam", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.swiftpair), Toast.LENGTH_SHORT).show()
             e.printStackTrace()
         }
     }
 
-    // Метод для настройки кнопок изменения задержки
+    // Method for customizing delay change buttons
     private fun setupDelayButtons() {
         binding.minusDelayButton.setOnClickListener {
             val i = Helper.delays.indexOf(Helper.delay)
@@ -302,9 +305,9 @@ class MainActivity : AppCompatActivity() {
         if (requestCode == 1) {
             if (resultCode == RESULT_OK) {
                 // Bluetooth is enabled
-                Toast.makeText(this, "Bluetooth is now enabled.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.bluetoothon), Toast.LENGTH_SHORT).show()
             } else {
-                Toast.makeText(this, "Bluetooth enabling failed.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.bluetootherror), Toast.LENGTH_SHORT).show()
             }
         }
     }
