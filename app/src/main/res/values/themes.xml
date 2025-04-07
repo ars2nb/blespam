@@ -1,15 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <style name="Theme.BLESpam" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorPrimary">#F9772F</item>
         <item name="colorPrimaryVariant">#A14B1C</item>
         <item name="colorOnPrimary">@color/white</item>
-
         <item name="colorSecondary">#000000</item>
         <item name="colorSecondaryVariant">#000000</item>
         <item name="colorOnSecondary">@color/white</item>
-
-        <item name="android:statusBarColor">?attr/colorPrimary</item>
+        <item name="android:statusBarColor">#F5F5F5</item>
+        <item name="android:windowLightStatusBar">true</item>
     </style>
 </resources>
