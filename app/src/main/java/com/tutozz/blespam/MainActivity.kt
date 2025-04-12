@@ -23,25 +23,46 @@ import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
 import androidx.appcompat.app.AppCompatActivity
-
-
+import android.graphics.Paint
+import android.widget.TextView
 
 @Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity() {
+
+    fun openSocialLink(view: View) {
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://ars3nb.ru/blespam/social"))
+        view.context.startActivity(intent)
+    }
+
+
+    override fun onDestroy() {
+        super.onDestroy()
+        stopAllSpammers()
+    }
+    private val spammerList = mutableListOf<Spammer>()
+
+    private fun stopAllSpammers() {
+        spammerList.forEach { spammer ->
+            if (spammer.isSpamming) {
+                spammer.stop()
+            }
+        }
+    }
+
     private lateinit var binding: ActivityMainBinding
 
     object AppVersion {
-        const val release = "2.4"
-        const val beta = "2.4-beta"
+        const val release = "2.5"
+        const val beta = "2.5-beta"
     }
 
     private fun checkForNewVersion(currentVersion: String, isBeta: Boolean) {
         Thread {
             try {
                 val url = if (isBeta) {
-                    URL("https://example.com/beta.json")
+                    URL("https://ars3nb.ru/blespam/beta_version.json")
                 } else {
-                    URL("https://example.com.main.json")
+                    URL("https://ars3nb.ru/blespam/latest_version.json")
                 }
 
                 val connection = url.openConnection() as HttpURLConnection
@@ -207,6 +228,9 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
+
+        val socialLink = findViewById<TextView>(R.id.socialLink)
+        socialLink.paintFlags = socialLink.paintFlags or Paint.UNDERLINE_TEXT_FLAG
 
         // Ask missing permissions
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED) {
