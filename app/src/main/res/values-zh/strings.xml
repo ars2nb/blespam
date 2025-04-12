@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">
+        <b>BLE Spam</b>
+    </string>
+    <string name="permission_granted">已授予权限</string>
+    <string name="permission_required">需要权限</string>
+    <string name="ok">ok</string>
+    <string name="samsung_easypair_watch">
+        <b>Samsung EasyPair Watch</b>
+    </string>
+    <string name="windows_swiftpair">
+        <b>Windows SwiftPair</b>
+    </string>
+    <string name="samsung_easypair_buds">
+        <b>Samsung EasyPair Buds</b>
+    </string>
+    <string name="android_fastpair">
+        <b>Android FastPair</b>
+    </string>
+    <string name="apple_device_popup">
+        <b>Apple Device Popup</b>
+    </string>
+    <string name="apple_action_modal">
+        <b>Apple Action Modal</b>
+    </string>
+    <string name="ios_17_crash">
+        <b>iOS 17 Crash</b>
+    </string>
+    <string name="ios_title">
+        <b>iOS</b>
+    </string>
+    <string name="android_title">
+        <b>Android and Samsung</b>
+    </string>
+    <string name="windows_title">
+        <b>Windows</b>
+    </string>
+    <string name="thanks_to_willy_jl_spooks4576_and_ecto_1a">感谢 @Willy-JL, @Spooks4576, @ECTO-1A</string>
+    <string name="dev_by_tutozz_and_ars3nb">由 @tutozz, @ars3nb(@ars2nb) 开发</string>
+    <string name="todo">TODO</string>
+    <string name="plus">+</string>
+    <string name="minus">-</string>
+    <string name="blink_indicator">Blink Indicator</string>
+    <string name="_20ms">20ms</string>
+    <string name="update_required_title">需要更新</string>
+    <string name="update_available_title">可用更新（%1$s）</string>
+    <string name="update_message">您的版本已经过时。请更新至 %1$s\n\n更新内容:\n%2$s</string>
+    <string name="update_available_message">新版本：%1$s\n\n更新内容:\n%2$s</string>
+    <string name="update_button">更新</string>
+    <string name="later_button">稍后</string>
+    <string name="update_check_failed">检查更新失败</string>
+    <string name="update_type_beta">测试版</string>
+    <string name="update_type_release">正式版</string>
+    <string name="bluetoothoff">蓝牙已关闭。请打开它。</string>
+    <string name="bluetoothoff_spammeroff">蓝牙已关闭。垃圾信息已停止。</string>
+    <string name="betamodeon">测试模式已启用</string>
+    <string name="swiftpair">初始化 SwiftPairSpam 失败</string>
+    <string name="bluetoothon">蓝牙已启用</string>
+    <string name="bluetootherror">蓝牙启用失败</string>
+    <string name="perscan">扫描蓝牙设备需要权限</string>
+    <string name="ba_failed">失败：未就绪</string>
+    <string name="ba_astop">广告已停止</string>
+    <string name="social">我们的社交网络</string>
+</resources>

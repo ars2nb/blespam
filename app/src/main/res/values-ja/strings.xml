@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">
+        <b>BLE Spam</b>
+    </string>
+    <string name="permission_granted">許可された</string>
+    <string name="permission_required">許可が必要です</string>
+    <string name="ok">ok</string>
+    <string name="samsung_easypair_watch">
+        <b>Samsung EasyPair Watch</b>
+    </string>
+    <string name="windows_swiftpair">
+        <b>Windows SwiftPair</b>
+    </string>
+    <string name="samsung_easypair_buds">
+        <b>Samsung EasyPair Buds</b>
+    </string>
+    <string name="android_fastpair">
+        <b>Android FastPair</b>
+    </string>
+    <string name="apple_device_popup">
+        <b>Apple Device Popup</b>
+    </string>
+    <string name="apple_action_modal">
+        <b>Apple Action Modal</b>
+    </string>
+    <string name="ios_17_crash">
+        <b>iOS 17 Crash</b>
+    </string>
+    <string name="ios_title">
+        <b>iOS</b>
+    </string>
+    <string name="android_title">
+        <b>Android and Samsung</b>
+    </string>
+    <string name="windows_title">
+        <b>Windows</b>
+    </string>
+    <string name="thanks_to_willy_jl_spooks4576_and_ecto_1a">Willy-JL、@Spooks4576、@ECTO-1Aに感謝します</string>
+    <string name="dev_by_tutozz_and_ars3nb">@tutozz, @ars3nb(@ars2nb) による開発</string>
+    <string name="todo">TODO</string>
+    <string name="plus">+</string>
+    <string name="minus">-</string>
+    <string name="blink_indicator">Blink Indicator</string>
+    <string name="_20ms">20ms</string>
+    <string name="update_required_title">更新が必要です</string>
+    <string name="update_available_title">アップデート可能 (%1$s)</string>
+    <string name="update_message">バージョンが古いです。%1$s にアップデートしてください。\n\n新機能:\n%2$s</string>
+    <string name="update_available_message">新しいバージョン: %1$s\n\n新機能:\n%2$s</string>
+    <string name="update_button">更新する</string>
+    <string name="later_button">後で</string>
+    <string name="update_check_failed">更新のチェックに失敗しました</string>
+    <string name="update_type_beta">ベータ</string>
+    <string name="update_type_release">リリース</string>
+    <string name="bluetoothoff">Bluetoothがオフになっています。オンにしてください。</string>
+    <string name="bluetoothoff_spammeroff">Bluetoothがオフになっています。スパマーは停止しました。</string>
+    <string name="betamodeon">ベータモードがオンになっています</string>
+    <string name="swiftpair">SwiftPairSpamの初期化に失敗しました</string>
+    <string name="bluetoothon">Bluetoothが有効になりました</string>
+    <string name="bluetootherror">Bluetoothの有効化に失敗しました</string>
+    <string name="perscan">Bluetoothデバイスをスキャンするには許可が必要です</string>
+    <string name="ba_failed">失敗しました：準備ができていません</string>
+    <string name="ba_astop">広告が停止しました</string>
+    <string name="social">ソーシャルネットワーク</string>
+</resources>

@@ -1,9 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">
         <b>BLE Spam</b>
     </string>
-    <string name="permission_granted">permission_granted</string>
-    <string name="permission_required">permission_required</string>
+    <string name="permission_granted">Permission granted</string>
+    <string name="permission_required">Permission required</string>
     <string name="ok">ok</string>
     <string name="samsung_easypair_watch">
         <b>Samsung EasyPair Watch</b>
@@ -35,8 +36,7 @@
     <string name="windows_title">
         <b>Windows</b>
     </string>
-    <string name="thanks_to_willy_jl_spooks4576_and_ecto_1a">Thanks to @Willy-JL, @Spooks4576,
-        @ECTO-1A</string>
+    <string name="thanks_to_willy_jl_spooks4576_and_ecto_1a">Thanks to @Willy-JL, @Spooks4576, @ECTO-1A</string>
     <string name="dev_by_tutozz_and_ars3nb">Dev by @tutozz, @ars3nb(@ars2nb)</string>
     <string name="todo">TODO</string>
     <string name="plus">+</string>
@@ -61,4 +61,5 @@
     <string name="perscan">Permission is required to scan Bluetooth devices</string>
     <string name="ba_failed">Failed: Not Ready</string>
     <string name="ba_astop">Advertising stopped</string>
+    <string name="social">Our Social Networks</string>
 </resources>

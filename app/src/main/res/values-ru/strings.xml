@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">
         <b>BLE Spam</b>
@@ -60,4 +61,5 @@
     <string name="perscan">Необходимо разрешение для сканирования Bluetooth устройств</string>
     <string name="ba_failed">Не удалось: Не готов</string>
     <string name="ba_astop">Реклама остановлена</string>
+    <string name="social">Наши Соц.Сети</string>
 </resources>

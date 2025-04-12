@@ -288,6 +288,23 @@
                     android:layout_height="wrap_content"
                     android:textSize="12sp"
                     android:text="@string/dev_by_tutozz_and_ars3nb" />
+
+                <TextView
+                    android:id="@+id/socialLink"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/social"
+                    android:textColor="@color/orange"
+                    android:textSize="16sp"
+                    android:fontFamily="@font/notosans_extrabold"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:layout_marginTop="24dp"
+                    android:layout_gravity="center_horizontal"
+                    android:onClick="openSocialLink" />
+
+
+
             </LinearLayout>
 
         </LinearLayout>
@@ -297,6 +314,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginBottom="0dp">
+
+
 
         <LinearLayout
             android:layout_width="wrap_content"

@@ -61,4 +61,5 @@
         <string name="perscan">Permissão necessária para escanear dispositivos Bluetooth</string>
         <string name="ba_failed">Falhou: Não está pronto</string>
         <string name="ba_astop">Publicidade parada</string>
+        <string name="social">As nossas redes sociais</string>
 </resources>
