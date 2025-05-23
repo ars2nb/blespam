@@ -3,7 +3,9 @@ package com.tutozz.blespam;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.Build;
 
+import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 
 import java.util.Random;
@@ -15,6 +17,7 @@ public class Helper {
     public static int[] delays = {10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 6000, 8000, 10000, 12000, 15000, 18000, 20000};
     public static int MAX_LOOP = 50_000_000;
 
+    @RequiresApi(api = Build.VERSION_CODES.S)
     public static boolean isPermissionGranted(Context c){
         return ActivityCompat.checkSelfPermission(c, Manifest.permission.BLUETOOTH) == PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(c, Manifest.permission.BLUETOOTH_ADMIN) == PackageManager.PERMISSION_GRANTED
