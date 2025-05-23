@@ -12,7 +12,7 @@ public class Helper {
     private static final char[] hexDigits = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
     public static Random random = new Random();
     public static int delay = 20;
-    public static int[] delays = {0, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 6000, 8000, 10000, 12000, 15000, 18000, 20000};
+    public static int[] delays = {10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 6000, 8000, 10000, 12000, 15000, 18000, 20000};
     public static int MAX_LOOP = 50_000_000;
 
     public static boolean isPermissionGranted(Context c){
