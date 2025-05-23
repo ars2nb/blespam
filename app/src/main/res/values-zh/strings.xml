@@ -50,11 +50,9 @@
     <string name="update_button">更新</string>
     <string name="later_button">稍后</string>
     <string name="update_check_failed">检查更新失败</string>
-    <string name="update_type_beta">测试版</string>
     <string name="update_type_release">正式版</string>
     <string name="bluetoothoff">蓝牙已关闭。请打开它。</string>
     <string name="bluetoothoff_spammeroff">蓝牙已关闭。垃圾信息已停止。</string>
-    <string name="betamodeon">测试模式已启用</string>
     <string name="swiftpair">初始化 SwiftPairSpam 失败</string>
     <string name="bluetoothon">蓝牙已启用</string>
     <string name="bluetootherror">蓝牙启用失败</string>
@@ -62,4 +60,11 @@
     <string name="ba_failed">失败：未就绪</string>
     <string name="ba_astop">广告已停止</string>
     <string name="social">我们的社交网络</string>
+    <string name="error_empty_description">請描述問題</string>
+    <string name="message_sent">已傳送的訊息</string>
+    <string name="send_error">傳送錯誤: %1$d</string>
+    <string name="exception_error">錯誤： %1$s</string>
+    <string name="send_button_text">傳送</string>
+    <string name="bug_report">錯誤回報</string>
+    <string name="please_wait">下次傳送前請稍候</string>
 </resources>

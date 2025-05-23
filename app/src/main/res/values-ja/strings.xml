@@ -50,11 +50,9 @@
     <string name="update_button">更新する</string>
     <string name="later_button">後で</string>
     <string name="update_check_failed">更新のチェックに失敗しました</string>
-    <string name="update_type_beta">ベータ</string>
     <string name="update_type_release">リリース</string>
     <string name="bluetoothoff">Bluetoothがオフになっています。オンにしてください。</string>
     <string name="bluetoothoff_spammeroff">Bluetoothがオフになっています。スパマーは停止しました。</string>
-    <string name="betamodeon">ベータモードがオンになっています</string>
     <string name="swiftpair">SwiftPairSpamの初期化に失敗しました</string>
     <string name="bluetoothon">Bluetoothが有効になりました</string>
     <string name="bluetootherror">Bluetoothの有効化に失敗しました</string>
@@ -62,4 +60,11 @@
     <string name="ba_failed">失敗しました：準備ができていません</string>
     <string name="ba_astop">広告が停止しました</string>
     <string name="social">ソーシャルネットワーク</string>
+    <string name="error_empty_description">問題を説明してください</string>
+    <string name="message_sent">メッセージを送信しました</string>
+    <string name="send_error">送信エラー: %1$d</string>
+    <string name="exception_error">エラーです： %1$s</string>
+    <string name="send_button_text">送信</string>
+    <string name="bug_report">バグ報告</string>
+    <string name="please_wait">次の送信までお待ちください</string>。
 </resources>

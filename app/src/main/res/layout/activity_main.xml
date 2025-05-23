@@ -7,6 +7,18 @@
     android:background="@color/white"
     tools:context=".MainActivity">
 
+    <!-- Bug Report Icon -->
+    <ImageView
+    android:id="@+id/bugReportButton"
+    android:layout_width="30dp"
+    android:layout_height="30dp"
+    android:layout_alignParentEnd="true"
+    android:layout_alignParentTop="true"
+    android:layout_marginTop="8dp"
+    android:layout_marginEnd="8dp"
+    android:src="@mipmap/ic_bug_report"
+    android:clickable="true"
+    android:focusable="true" />
 
     <!-- Title -->
     <ImageView

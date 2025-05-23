@@ -50,11 +50,9 @@
     <string name="update_button">Update</string>
     <string name="later_button">Later</string>
     <string name="update_check_failed">Failed to check for updates</string>
-    <string name="update_type_beta">Beta</string>
     <string name="update_type_release">Release</string>
     <string name="bluetoothoff">Bluetooth is off. Please turn it on.</string>
     <string name="bluetoothoff_spammeroff">Bluetooth is off. Spammer stopped.</string>
-    <string name="betamodeon">Beta mode ON</string>
     <string name="swiftpair">Failed to initialize SwiftPairSpam</string>
     <string name="bluetoothon">Bluetooth is now enabled.</string>
     <string name="bluetootherror">Bluetooth enabling failed.</string>
@@ -62,4 +60,11 @@
     <string name="ba_failed">Failed: Not Ready</string>
     <string name="ba_astop">Advertising stopped</string>
     <string name="social">Our Social Networks</string>
+    <string name="error_empty_description">Please describe the issue</string>
+    <string name="message_sent">Message sent</string>
+    <string name="send_error">Send error: %1$d</string>
+    <string name="exception_error">Error: %1$s</string>
+    <string name="send_button_text">Send</string>
+    <string name="bug_report">Bug Report</string>
+    <string name="please_wait">Please wait before the next sending</string>
 </resources>

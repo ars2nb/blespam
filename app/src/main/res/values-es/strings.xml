@@ -50,11 +50,9 @@
     <string name="update_button">Actualizar</string>
     <string name="later_button">Más tarde</string>
     <string name="update_check_failed">No se ha podido comprobar si hay actualizaciones</string>
-    <string name="update_type_beta">Beta</string>
     <string name="update_type_release">Lanzamiento</string>
     <string name="bluetoothoff">El Bluetooth está desactivado. Por favor, enciéndalo.</string>
     <string name="bluetoothoff_spammeroff">El Bluetooth está apagado. Spammer detenido.</string>
-    <string name="betamodeon">Modo beta activado</string>
     <string name="swiftpair">Fallo al inicializar SwiftPairSpam</string>
     <string name="bluetoothon">El bluetooth está activado</string>
     <string name="bluetootherror">Falló la activación de Bluetooth.</string>
@@ -62,4 +60,11 @@
     <string name="ba_failed">Fallo: Not Ready</string>
     <string name="ba_astop">Publicidad detenida</string>
     <string name="social">Nuestra red social</string>
+    <string name="error_empty_description">Por favor, describa el problema</string>
+    <string name="message_sent">Mensaje enviado</string>
+    <string name="send_error">Enviar error: %1$d</string>
+    <string name="exception_error">Error: %1$s</string>
+    <string name="send_button_text">Enviar</string>
+    <string name="bug_report">Informe de error</string>
+    <string name="please_wait">Por favor, espere antes del próximo envío</string>
 </resources>

@@ -50,11 +50,9 @@
     <string name="update_button">Обновить</string>
     <string name="later_button">Позже</string>
     <string name="update_check_failed">Не удалось проверить обновления</string>
-    <string name="update_type_beta">Бета-версия</string>
     <string name="update_type_release">Релиз</string>
     <string name="bluetoothoff">Bluetooth выключен. Пожалуйста, включите его.</string>
     <string name="bluetoothoff_spammeroff">Bluetooth выключен. Спамер остановлен.</string>
-    <string name="betamodeon">Бета-версия активирована</string>
     <string name="swiftpair">Не удалось запустить SwiftPairSpam</string>
     <string name="bluetoothon">Bluetooth теперь включен.</string>
     <string name="bluetootherror">Включение Bluetooth не удалось.</string>
@@ -62,4 +60,11 @@
     <string name="ba_failed">Не удалось: Не готов</string>
     <string name="ba_astop">Реклама остановлена</string>
     <string name="social">Наши Соц.Сети</string>
+    <string name="error_empty_description">Пожалуйста, опишите проблему</string>
+    <string name="message_sent">Сообщение отправлено</string>
+    <string name="send_error">Ошибка отправки: %1$d</string>
+    <string name="exception_error">Ошибка: %1$s</string>
+    <string name="send_button_text">Отправить</string>
+    <string name="bug_report">Отчет об ошибке</string>
+    <string name="please_wait">Пожалуйста, подождите перед следующей отправкой</string>
 </resources>

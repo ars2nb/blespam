@@ -50,11 +50,9 @@
     <string name="update_button">업데이트</string>
     <string name="later_button">나중에</string>
     <string name="update_check_failed">업데이트 확인에 실패했습니다</string>
-    <string name="update_type_beta">베타</string>
     <string name="update_type_release">릴리즈</string>
     <string name="bluetoothoff">블루투스가 꺼져 있습니다. 켜주세요</string>
     <string name="bluetoothoff_spammeroff">블루투스가 꺼져 있습니다. 스패머가 중지되었습니다.</string>
-    <string name="betamodeon">베타 모드 켜짐</string>
     <string name="swiftpair">스위프트페어스팸을 초기화하지 못했습니다</string>
     <string name="bluetoothon">블루투스가 이제 활성화되었습니다.</string>
     <string name="bluetootherror">블루투스 활성화에 실패했습니다.</string>
@@ -62,4 +60,11 @@
     <string name="ba_failed">실패했습니다: 준비되지 않음</string>
     <string name="ba_astop">광고가 중지되었습니다</string>
     <string name="social">소셜 네트워크</string>
+    <string name="error_empty_description">문제를 설명해 주세요</string>
+    <string name="message_sent">전송된 메시지</string>
+    <string name="send_error">전송 오류: %1$d</string>
+    <string name="exception_error">에러입니다: 1$s</string>
+    <string name="send_button_text">전송</string>
+    <string name="bug_report">버그 보고서</string>
+    <string name="please_wait">다음 전송 전에 잠시 기다려 주세요</string>
 </resources>
