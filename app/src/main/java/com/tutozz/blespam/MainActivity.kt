@@ -30,15 +30,15 @@ import android.widget.TextView
 class MainActivity : AppCompatActivity() {
 
     fun openSocialLink(view: View) {
-        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://ars3nb.ru/blespam/social"))
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://example.com/social.html"))
         view.context.startActivity(intent)
     }
-
 
     override fun onDestroy() {
         super.onDestroy()
         stopAllSpammers()
     }
+
     private val spammerList = mutableListOf<Spammer>()
 
     private fun stopAllSpammers() {
@@ -51,19 +51,19 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
-    object AppVersion {
-        const val release = "2.5"
-        const val beta = "2.5-beta"
+    private fun getAppVersion(): String {
+        return try {
+            packageManager.getPackageInfo(packageName, 0).versionName
+        } catch (e: PackageManager.NameNotFoundException) {
+            "0.0"
+        }
     }
 
-    private fun checkForNewVersion(currentVersion: String, isBeta: Boolean) {
+    private fun checkForNewVersion() {
         Thread {
             try {
-                val url = if (isBeta) {
-                    URL("https://ars3nb.ru/blespam/beta_version.json")
-                } else {
-                    URL("https://ars3nb.ru/blespam/latest_version.json")
-                }
+                val url = URL("https://example.com/index.json")
+                val currentVersion = getAppVersion()
 
                 val connection = url.openConnection() as HttpURLConnection
                 connection.requestMethod = "GET"
@@ -95,9 +95,8 @@ class MainActivity : AppCompatActivity() {
                         }
                         isVersionNewer(latestVersion, currentVersion) -> {
                             // Regular update
-                            val updateType = if (isBeta) getString(R.string.update_type_beta) else getString(R.string.update_type_release)
                             AlertDialog.Builder(this)
-                                .setTitle(getString(R.string.update_available_title, updateType))
+                                .setTitle(getString(R.string.update_available_title))
                                 .setMessage(getString(R.string.update_available_message, latestVersion, releaseNotes))
                                 .setPositiveButton(R.string.update_button) { _, _ ->
                                     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(downloadUrl))
@@ -118,7 +117,6 @@ class MainActivity : AppCompatActivity() {
         }.start()
     }
 
-
     private fun isVersionNewer(newVersion: String, currentVersion: String): Boolean {
         fun normalize(v: String) = v.replace("[^\\d.]".toRegex(), "")
             .split(".")
@@ -138,23 +136,36 @@ class MainActivity : AppCompatActivity() {
         return false
     }
 
-
-
     private fun checkBluetoothEnabled(): Boolean {
         val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
         return bluetoothAdapter != null && bluetoothAdapter.isEnabled
     }
 
     private fun promptToEnableBluetooth() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT)
-            != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.BLUETOOTH_CONNECT),
-                2
-            )
-            return
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            // For Android 12 (API 31) and higher, request BLUETOOTH_CONNECT
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT)
+                != PackageManager.PERMISSION_GRANTED
+            ) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.BLUETOOTH_CONNECT),
+                    2
+                )
+                return
+            }
+        } else {
+            // For older Android versions, request BLUETOOTH permission
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH)
+                != PackageManager.PERMISSION_GRANTED
+            ) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.BLUETOOTH),
+                    2
+                )
+                return
+            }
         }
 
         val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
@@ -186,24 +197,18 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
-    // blink animation with additional Bluetooth check
     private fun startBlinking(imageView: ImageView, spammer: Spammer, button: Button): Runnable {
         val handler = Handler(Looper.getMainLooper())
         val blinkRunnable: Runnable = object : Runnable {
             override fun run() {
-                // If spamming is on, but Bluetooth is off, stop the spammer and update UI
                 if (spammer.isSpamming && !checkBluetoothEnabled()) {
                     spammer.stop()
                     imageView.setImageResource(R.drawable.grey_circle)
-                    // Restore button style
                     button.backgroundTintList = ContextCompat.getColorStateList(this@MainActivity, R.color.empty)
                     button.setTextColor(ContextCompat.getColor(this@MainActivity, R.color.black))
                     Toast.makeText(this@MainActivity, getString(R.string.bluetoothoff_spammeroff), Toast.LENGTH_SHORT).show()
-
-                    return // Exit the loop
+                    return
                 }
-                // Standard blinking logic
                 if (spammer.isSpamming) {
                     if (imageView.visibility == View.VISIBLE) {
                         imageView.visibility = View.INVISIBLE
@@ -222,17 +227,23 @@ class MainActivity : AppCompatActivity() {
         return blinkRunnable
     }
 
-    @SuppressLint("SetTextI18n")
+    @SuppressLint("SetTextI18n", "NewApi", "MissingSuperCall")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
 
+        val bugButton: ImageView = findViewById(R.id.bugReportButton)
+        bugButton.setOnClickListener {
+            val intent = Intent(this, BugReportActivity::class.java)
+            startActivity(intent)
+        }
+
         val socialLink = findViewById<TextView>(R.id.socialLink)
         socialLink.paintFlags = socialLink.paintFlags or Paint.UNDERLINE_TEXT_FLAG
 
-        // Ask missing permissions
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.BLUETOOTH), 1)
         } else if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_ADMIN) != PackageManager.PERMISSION_GRANTED) {
@@ -243,48 +254,15 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        val prefs = getSharedPreferences("settings", MODE_PRIVATE)
-        var betaModeEnabled = prefs.getBoolean("beta_mode", false)
+        checkForNewVersion()
 
-        // Checking the application version
-        checkForNewVersion(AppVersion.beta, betaModeEnabled)
-
-        var logoClickCount = 0
-        val logoClickResetDelay = 1000L
-
-        // Logo click handler
-        if (!betaModeEnabled) {
-            binding.logo.setOnClickListener {
-                logoClickCount++
-                Handler(Looper.getMainLooper()).postDelayed({
-                    logoClickCount = 0
-                }, logoClickResetDelay)
-
-                // Enabling beta mode
-                if (logoClickCount >= 3) {
-                    betaModeEnabled = true
-                    prefs.edit().putBoolean("beta_mode", true).apply()
-                    logoClickCount = 0
-                    Toast.makeText(this, getString(R.string.betamodeon), Toast.LENGTH_SHORT).show()
-                    checkForNewVersion(AppVersion.beta, isBeta = true)
-                }
-            }
-        }
-
-// Verification of authorizations
         if (Helper.isPermissionGranted(this)) {
-            // Initialization of spam buttons
             initializeSpamButtons()
-
-            // Setting handlers to change the delay
             setupDelayButtons()
         }
-
-
-        checkForNewVersion(AppVersion.release, isBeta = false)
     }
 
-    // Method for initializing spam buttons
+
     private fun initializeSpamButtons() {
         try {
             onClickSpamButton(ContinuitySpam(ContinuityDevice.type.ACTION, true), binding.ios17CrashButton, binding.ios17CrashCircle)
@@ -302,7 +280,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Method for customizing delay change buttons
+    @SuppressLint("SetTextI18n")
     private fun setupDelayButtons() {
         binding.minusDelayButton.setOnClickListener {
             val i = Helper.delays.indexOf(Helper.delay)
@@ -321,14 +299,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
-    // Handle Bluetooth enable result
     @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == 1) {
             if (resultCode == RESULT_OK) {
-                // Bluetooth is enabled
                 Toast.makeText(this, getString(R.string.bluetoothon), Toast.LENGTH_SHORT).show()
             } else {
                 Toast.makeText(this, getString(R.string.bluetootherror), Toast.LENGTH_SHORT).show()
