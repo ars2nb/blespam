@@ -3,6 +3,7 @@ package com.tutozz.blespam
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -15,32 +16,37 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
+import java.util.Locale
 
 @SuppressLint("CustomSplashScreen")
 class SplashActivity : AppCompatActivity() {
 
+    private lateinit var sharedPref: SharedPreferences
     private val permissionRequestLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
-        val fineLocationGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true
-        val bluetoothScanGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            permissions[Manifest.permission.BLUETOOTH_SCAN] == true
-        } else {
-            true
-        }
-
-        if (fineLocationGranted && bluetoothScanGranted) {
-            proceedToMainActivity()
-        } else {
-            Toast.makeText(this, getString(R.string.perscan), Toast.LENGTH_SHORT).show()
-            finish()
-        }
+        handlePermissionsResult(permissions)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Инициализация языка перед setContentView
+        sharedPref = getSharedPreferences("AppSettings", MODE_PRIVATE)
+        val languageCode = sharedPref.getString("language", Locale.getDefault().language) ?: "en"
+        setAppLanguage(languageCode)
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
 
+        initViews()
+
+        if (hasPermissions()) {
+            proceedToMainActivity()
+        } else {
+            requestPermissions()
+        }
+    }
+
+    private fun initViews() {
         val gifImageView: ImageView = findViewById(R.id.gifImageView)
         val versionTextView: TextView = findViewById(R.id.versionTextView)
 
@@ -49,13 +55,35 @@ class SplashActivity : AppCompatActivity() {
             .load(R.drawable.anim)
             .into(gifImageView)
 
-        val version = "v${BuildConfig.VERSION_NAME} by ars2nb"
-        versionTextView.text = version
+        versionTextView.text = getString(R.string.app_version, BuildConfig.VERSION_NAME)
+    }
 
-        if (hasPermissions()) {
-            proceedToMainActivity()
+    private fun setAppLanguage(languageCode: String) {
+        val locale = Locale(languageCode)
+        Locale.setDefault(locale)
+
+        val config = resources.configuration
+        config.setLocale(locale)
+        resources.updateConfiguration(config, resources.displayMetrics)
+
+        // Обновляем контекст для активности
+        createConfigurationContext(config)
+    }
+
+    private fun handlePermissionsResult(permissions: Map<String, Boolean>) {
+        val fineLocationGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true
+        val bluetoothScanGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            permissions[Manifest.permission.BLUETOOTH_SCAN] == true
         } else {
-            requestPermissions()
+            true
+        }
+
+        when {
+            fineLocationGranted && bluetoothScanGranted -> proceedToMainActivity()
+            else -> {
+                Toast.makeText(this, getString(R.string.perscan), Toast.LENGTH_LONG).show()
+                Handler(Looper.getMainLooper()).postDelayed({ finish() }, 2000)
+            }
         }
     }
 
@@ -76,21 +104,21 @@ class SplashActivity : AppCompatActivity() {
     }
 
     private fun requestPermissions() {
-        val permissionsNeeded = mutableListOf<String>()
+        val permissionsNeeded = mutableListOf<String>().apply {
+            if (ContextCompat.checkSelfPermission(
+                    this@SplashActivity,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED) {
+                add(Manifest.permission.ACCESS_FINE_LOCATION)
+            }
 
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED) {
-            permissionsNeeded.add(Manifest.permission.ACCESS_FINE_LOCATION)
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
-            ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.BLUETOOTH_SCAN
-            ) != PackageManager.PERMISSION_GRANTED) {
-            permissionsNeeded.add(Manifest.permission.BLUETOOTH_SCAN)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+                ContextCompat.checkSelfPermission(
+                    this@SplashActivity,
+                    Manifest.permission.BLUETOOTH_SCAN
+                ) != PackageManager.PERMISSION_GRANTED) {
+                add(Manifest.permission.BLUETOOTH_SCAN)
+            }
         }
 
         if (permissionsNeeded.isNotEmpty()) {
@@ -102,8 +130,7 @@ class SplashActivity : AppCompatActivity() {
 
     private fun proceedToMainActivity() {
         Handler(Looper.getMainLooper()).postDelayed({
-            val intent = Intent(this@SplashActivity, MainActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(this, MainActivity::class.java))
             finish()
         }, 1400)
     }
