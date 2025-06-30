@@ -7,18 +7,18 @@
     android:background="@color/white"
     tools:context=".MainActivity">
 
-    <!-- Bug Report Icon -->
+    <!-- Settings Menu Icon -->
     <ImageView
-    android:id="@+id/bugReportButton"
-    android:layout_width="30dp"
-    android:layout_height="30dp"
-    android:layout_alignParentEnd="true"
-    android:layout_alignParentTop="true"
-    android:layout_marginTop="8dp"
-    android:layout_marginEnd="8dp"
-    android:src="@mipmap/ic_bug_report"
-    android:clickable="true"
-    android:focusable="true" />
+        android:id="@+id/settingsButton"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:src="@mipmap/ic_menu"
+        android:clickable="true"
+        android:focusable="true" />
 
     <!-- Title -->
     <ImageView
@@ -27,7 +27,6 @@
         android:layout_height="50dp"
         android:layout_marginBottom="20dp"
         android:src="@drawable/logo"
-        tools:ignore="ImageContrastCheck"
         android:contentDescription="@string/blink_indicator" />
 
     <!-- Buttons -->
@@ -51,22 +50,22 @@
                 android:textSize="11sp" />
             <!-- iOS 17 Crash Button -->
             <FrameLayout
-            android:id="@+id/ios17CrashButtonLayout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+                android:id="@+id/ios17CrashButtonLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_marginBottom="5dp">
 
-            <Button
-                android:id="@+id/ios17CrashButton"
-                android:layout_width="wrap_content"
-                android:layout_height="60dp"
-                android:layout_marginEnd="5dp"
-                android:backgroundTint="@color/empty"
-                android:paddingStart="15dp"
-                android:paddingEnd="35dp"
-                android:text="@string/ios_17_crash"
-                android:fontFamily="@font/notosans_extrabold"
-                android:textColor="@color/black" />
+                <Button
+                    android:id="@+id/ios17CrashButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="60dp"
+                    android:layout_marginEnd="5dp"
+                    android:backgroundTint="@color/empty"
+                    android:paddingStart="15dp"
+                    android:paddingEnd="35dp"
+                    android:text="@string/ios_17_crash"
+                    android:fontFamily="@font/notosans_extrabold"
+                    android:textColor="@color/black" />
 
                 <ImageView
                     android:id="@+id/ios17CrashCircle"
@@ -79,7 +78,7 @@
                     android:elevation="10dp"
                     android:src="@drawable/grey_circle"
                     tools:ignore="ImageContrastCheck" />
-        </FrameLayout>
+            </FrameLayout>
             <!-- Apple Action Modal Button -->
             <FrameLayout
                 android:id="@+id/appleActionModalButtonLayout"
@@ -315,8 +314,6 @@
                     android:layout_gravity="center_horizontal"
                     android:onClick="openSocialLink" />
 
-
-
             </LinearLayout>
 
         </LinearLayout>
@@ -326,8 +323,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginBottom="0dp">
-
-
 
         <LinearLayout
             android:layout_width="wrap_content"

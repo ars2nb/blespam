@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/gradient_background"
+    android:padding="24dp"
+    android:gravity="center_horizontal"
+    android:baselineAligned="false">
+
+    <!-- Logo with scale animation -->
+    <ImageView
+        android:id="@+id/logo"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="32dp"
+        android:src="@drawable/logo"
+        android:transitionName="logo_transition"
+        android:scaleType="centerInside"
+        android:animation="@anim/scale_animation" />
+
+    <!-- Report Bug Button with ripple effect -->
+    <Button
+        android:id="@+id/button_report_bug"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:text="@string/bug_report"
+        android:background="@drawable/button_gradient"
+        android:textColor="#FFFFFF"
+        android:textAllCaps="false"
+        android:textSize="16sp"
+        android:fontFamily="sans-serif-medium"
+        android:elevation="6dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="24dp"
+        android:paddingHorizontal="16dp"
+        android:stateListAnimator="@anim/button_elevation"
+        android:foreground="?android:attr/selectableItemBackground"
+        android:onClick="openBugReportActivity" />
+
+    <!-- Language Switcher Label -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/lang"
+        android:textColor="#333333"
+        android:textSize="18sp"
+        android:fontFamily="sans-serif-medium"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="12dp"
+        android:letterSpacing="0.02" />
+
+    <!-- Spinner with custom dropdown style -->
+    <Spinner
+        android:id="@+id/language_spinner"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="@drawable/spinner_gradient"
+        android:popupBackground="@drawable/spinner_popup_background"
+        android:padding="12dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="24dp"
+        android:spinnerMode="dropdown"
+        android:dropDownVerticalOffset="8dp" />
+
+    <!-- Toggle Logo Animation Card -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="6dp"
+        app:cardBackgroundColor="#FFFFFF"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="24dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="20dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/logo_animation"
+            android:textSize="16sp"
+            android:textColor="#333333"
+            android:fontFamily="sans-serif" />
+
+            <Switch
+                android:id="@+id/switch_logo_animation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:thumbTint="@color/switch_thumb_color"
+                android:trackTint="@color/switch_track_color"
+                android:minHeight="48dp"
+                android:scaleX="1.3"
+                android:scaleY="1.3"
+                android:layout_marginStart="12dp"
+                app:trackTintMode="multiply" />
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- Spacer -->
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <!-- App Version -->
+    <TextView
+        android:id="@+id/text_app_version"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#666666"
+        android:textSize="14sp"
+        android:fontFamily="sans-serif-light"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="16dp"
+        android:alpha="0.8" />
+
+</LinearLayout>

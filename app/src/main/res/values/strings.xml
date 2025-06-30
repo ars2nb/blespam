@@ -44,7 +44,7 @@
     <string name="blink_indicator">Blink Indicator</string>
     <string name="_20ms">20ms</string>
     <string name="update_required_title">Update Required</string>
-    <string name="update_available_title">Update Available (%1$s)</string>
+    <string name="update_available_title">Update Available</string>
     <string name="update_message">Your version is outdated. Please update to %1$s\n\nWhat\'s New:\n%2$s</string>
     <string name="update_available_message">New version: %1$s\n\nWhat\'s New:\n%2$s</string>
     <string name="update_button">Update</string>
@@ -67,4 +67,79 @@
     <string name="send_button_text">Send</string>
     <string name="bug_report">Bug Report</string>
     <string name="please_wait">Please wait before the next sending</string>
+    <string name="app_version">Version: %s</string>
+    <string-array name="available_language_names">
+        <item>Deutsch</item>
+        <item>Español</item>
+        <item>Italiano</item>
+        <item>日本語</item>
+        <item>한국어</item>
+        <item>Português</item>
+        <item>Русский</item>
+        <item>中文</item>
+        <item>English</item>
+    </string-array>
+    <string-array name="available_language_codes">
+        <item>de</item>
+        <item>es</item>
+        <item>it</item>
+        <item>ja</item>
+        <item>ko</item>
+        <item>pt</item>
+        <item>ru</item>
+        <item>zh</item>
+        <item>en</item>
+    </string-array>
+    <string name="lang">Language</string>
+
+    <string name="logo_animation">Logo animation</string>
+    <string name="bug_report_title">Bug Report</string>
+    <string name="char_counter_format">%1$d/%2$d</string>
+    <string name="sending_button_text">Sending...</string>
+    <string name="empty_description_error">Description cannot be empty</string>
+    <string name="char_limit_exceeded">Character limit exceeded (%1$d)</string>
+    <string name="report_sent_success">Report successfully sent</string>
+    <string name="server_error">Server error: %1$s</string>
+    <string name="connection_error">Connection error: %1$s</string>
+    <string name="unknown_error">Unknown error</string>
+    <string name="no_network_connection">No network connection available</string>
+    <string name="insufficient_storage">Insufficient storage space</string>
+    <string name="invalid_download_url">Invalid download URL</string>
+    <string name="download_failed">Download failed: %1$s</string>
+    <string name="download_completed">Download completed</string>
+    <string name="error_progress_bar">Error: Progress bar not available</string>
+    <string name="error_progress_display">Error: Progress display not available</string>
+    <string name="download_cancelled">Download cancelled or not found</string>
+    <string name="invalid_file_uri">Invalid file URI</string>
+    <string name="file_access_error">Could not access downloaded file</string>
+    <string name="invalid_apk_file">Downloaded file is invalid</string>
+    <string name="file_provider_error">Error preparing file for installation</string>
+    <string name="no_install_app">No app found to install APK</string>
+    <string name="installation_failed">Installation failed: %1$s</string>
+    <string name="install_permission_denied">Install permission denied</string>
+    <string name="download_start_failed">Failed to start download</string>
+    <string name="progress_bar_not_found">ProgressBar not found in update dialog layout</string>
+    <string name="progress_container_not_found">Progress container not found in update dialog layout</string>
+    <string name="progress_text_not_found">Progress text not found in update dialog layout</string>
+    <string name="update_dialog_error">Error: Unable to show update dialog</string>
+    <string name="http_data_error">Network data error</string>
+    <string name="unhandled_http_code">Unexpected HTTP code</string>
+    <string name="file_error">File error</string>
+    <string name="unknown_download_status">Unknown download status: %1$d</string>
+    <string name="download_not_found">Download not found</string>
+    <string name="download_error">Error checking download: %1$s</string>
+    <string name="download_title">BLE Spam Update</string>
+    <string name="download_description">Downloading version %1$s</string>
+    <string name="progress_text">%1$d%% (%2$d KB/s)</string>
+    <string name="delay_text">%1$dms</string>
+    <string name="download_paused">Download Paused</string>
+    <string name="download_pending">Download Pending</string>
+    <string name="invalid_file_path">Invalid file path</string>
+    <string name="unsupported_uri_scheme">Unsupported URI scheme</string>
+    <string name="installation_error">Error preparing installation: %1$s</string>
+    <string name="blocked_version_message">Your application version (%1$s) is locked. Please update the application to the latest version.\n\n\n\nRelease Notes: %2$s</string>
+    <string name="storage_permission_denied">Permission to storage is not granted</string>
+    <string name="bluetooth_permission_denied">Bluetooth permission is not granted</string>
+    <string name="permissions_denied">permission is not granted</string>
+    <string name="no_browser_found">No browsers found</string>
 </resources>

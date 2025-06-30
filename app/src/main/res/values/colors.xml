@@ -5,4 +5,14 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="grey">#888888</color>
+    <color name="orange_primary">#FF6D00</color>
+    <color name="orange_secondary">#FF9E40</color>
+    <color name="orange_light">#FFF3E0</color>
+    <color name="dark_gray">#424242</color>
+    <color name="light_gray">#E0E0E0</color>
+    <color name="gray_light">#D3D3D3</color>
+    <color name="switch_thumb_color">#FF8F00</color>
+    <color name="switch_track_color">#FFB300</color>
+    <color name="switch_thumb_disabled">#B0BEC5</color>
+    <color name="switch_track_disabled">#E0E0E0</color>
 </resources>
