@@ -51,7 +51,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var downloadProgressBar: ProgressBar
     private val progressHandler = Handler(Looper.getMainLooper())
 
-    // Activity result launcher for Bluetooth and install permissions
     private val enableBluetoothLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == RESULT_OK) {
             Toast.makeText(this, getString(R.string.bluetoothon), Toast.LENGTH_SHORT).show()
@@ -77,7 +76,7 @@ class MainActivity : AppCompatActivity() {
 
     fun openSocialLink(view: View) {
         try {
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://ars3nb.ru/blespam/social"))
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(SOCIAL_LINK))
             startActivity(intent)
         } catch (e: ActivityNotFoundException) {
             Toast.makeText(this, getString(R.string.no_browser_found), Toast.LENGTH_SHORT).show()
@@ -112,7 +111,7 @@ class MainActivity : AppCompatActivity() {
         Thread {
             var connection: HttpsURLConnection? = null
             try {
-                val url = URL("https://example.com/versions.json")
+                val url = URL(VERSION_CHECK_API)
                 val currentVersion = getAppVersion()
                 connection = url.openConnection() as HttpsURLConnection
                 connection.requestMethod = "GET"
@@ -135,7 +134,6 @@ class MainActivity : AppCompatActivity() {
 
                     runOnUiThread {
                         when {
-                            // Проверка, если текущая версия в списке заблокированных
                             blockedVersions.contains(currentVersion) -> {
                                 showUpdateDialog(
                                     title = getString(R.string.update_required_title),
@@ -144,7 +142,6 @@ class MainActivity : AppCompatActivity() {
                                     downloadUrl = downloadUrl
                                 )
                             }
-                            // Проверка минимальной поддерживаемой версии
                             isVersionNewer(minSupportedVersion, currentVersion) -> {
                                 showUpdateDialog(
                                     title = getString(R.string.update_required_title),
@@ -153,7 +150,6 @@ class MainActivity : AppCompatActivity() {
                                     downloadUrl = downloadUrl
                                 )
                             }
-                            // Проверка на наличие новой версии
                             isVersionNewer(latestVersion, currentVersion) -> {
                                 showUpdateDialog(
                                     title = getString(R.string.update_available_title),
@@ -184,6 +180,8 @@ class MainActivity : AppCompatActivity() {
             connectivityManager.activeNetworkInfo?.isConnected == true
         }
     }
+
+    
 
     private fun hasEnoughStorage(): Boolean {
         val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)

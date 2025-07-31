@@ -1,8 +1,11 @@
 package com.tutozz.blespam
 
+import android.content.Context
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.widget.Button
@@ -22,19 +25,34 @@ import java.util.*
 
 class BugReportActivity : AppCompatActivity() {
 
-    private val serverUrl = "https://example.com/reportbug.php"
-    private val MAX_DESCRIPTION_LENGTH = 1000 // Updated to match layout's "0/1000"
+    private val MAX_DESCRIPTION_LENGTH = 1000
+    private val SPAM_COOLDOWN_MS = 60_000L // 1 minute in milliseconds
+    private val PREFS_NAME = "BugReportPrefs"
+    private val PREF_LAST_REPORT_TIME = "lastReportTime"
+    private lateinit var sendButton: Button
+    private val handler = Handler(Looper.getMainLooper())
+
+    private fun getAppLanguage(): String {
+        val prefs = getSharedPreferences("AppSettings", Context.MODE_PRIVATE)
+        // Replace "app_language" with the key used to store the app's language preference
+        // Default to "en" (English) or another fallback if not set
+        return prefs.getString("app_language", "en") ?: "en"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_bug) // Corrected from R.activity_bug
+        setContentView(R.layout.activity_bug)
         title = getString(R.string.bug_report_title)
 
         val reportEditText = findViewById<EditText>(R.id.editText)
-        val sendButton = findViewById<Button>(R.id.sendButton)
+        sendButton = findViewById<Button>(R.id.sendButton)
         val charCountText = findViewById<TextView>(R.id.charCountText)
 
         charCountText.text = getString(R.string.char_counter_format, 0, MAX_DESCRIPTION_LENGTH)
+
+        // Check cooldown and start auto-enable timer
+        updateButtonState()
+        startCooldownTimer()
 
         reportEditText.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -51,13 +69,11 @@ class BugReportActivity : AppCompatActivity() {
                     }
                     currentLength > MAX_DESCRIPTION_LENGTH * 0.9 -> {
                         charCountText.setTextColor(Color.parseColor("#FF6600")) // Orange
-                        sendButton.isEnabled = true
-                        sendButton.alpha = 1f
+                        updateButtonState()
                     }
                     else -> {
                         charCountText.setTextColor(Color.parseColor("#666666"))
-                        sendButton.isEnabled = true
-                        sendButton.alpha = 1f
+                        updateButtonState()
                     }
                 }
             }
@@ -69,7 +85,7 @@ class BugReportActivity : AppCompatActivity() {
             val description = reportEditText.text.toString().trim()
 
             if (description.isEmpty()) {
-                showToast(getString(R.string.error_empty_description)) // Updated to match layout's string
+                showToast(getString(R.string.error_empty_description))
                 return@setOnClickListener
             }
 
@@ -78,12 +94,19 @@ class BugReportActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
+            // Check cooldown before sending
+            if (isCooldownActive()) {
+                val remainingSeconds = getRemainingCooldownSeconds()
+                showToast(getString(R.string.cooldown_error, remainingSeconds))
+                return@setOnClickListener
+            }
+
             CoroutineScope(Dispatchers.Main).launch {
                 try {
                     val deviceModel = "${Build.MANUFACTURER} ${Build.MODEL}"
-                    val language = Locale.getDefault().language
+                    val language = getAppLanguage()
                     val appVersion = getAppVersion()
-                    val timestamp = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
+                    val timestamp = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(Date())
 
                     sendButton.isEnabled = false
                     sendButton.text = getString(R.string.sending_button_text)
@@ -97,14 +120,18 @@ class BugReportActivity : AppCompatActivity() {
                     )
 
                     if (success) {
+                        // Save the timestamp of the successful report
+                        saveLastReportTime()
                         showToast(getString(R.string.report_sent_success))
                         reportEditText.text.clear()
+                        // Navigate back to previous screen
+                        finish()
                     }
                 } catch (e: Exception) {
                     showToast(getString(R.string.connection_error, e.message ?: getString(R.string.unknown_error)))
                 } finally {
-                    sendButton.isEnabled = true
                     sendButton.text = getString(R.string.send_button_text)
+                    updateButtonState()
                 }
             }
         }
@@ -115,6 +142,50 @@ class BugReportActivity : AppCompatActivity() {
             packageManager.getPackageInfo(packageName, 0).versionName ?: "Unknown"
         } catch (e: Exception) {
             "Unknown"
+        }
+    }
+
+    private fun saveLastReportTime() {
+        val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putLong(PREF_LAST_REPORT_TIME, System.currentTimeMillis()).apply()
+    }
+
+    private fun getLastReportTime(): Long {
+        val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        return prefs.getLong(PREF_LAST_REPORT_TIME, 0L)
+    }
+
+    private fun isCooldownActive(): Boolean {
+        val lastReportTime = getLastReportTime()
+        val currentTime = System.currentTimeMillis()
+        return (currentTime - lastReportTime) < SPAM_COOLDOWN_MS
+    }
+
+    private fun getRemainingCooldownSeconds(): Long {
+        val lastReportTime = getLastReportTime()
+        val currentTime = System.currentTimeMillis()
+        val elapsed = currentTime - lastReportTime
+        return if (elapsed < SPAM_COOLDOWN_MS) {
+            ((SPAM_COOLDOWN_MS - elapsed) / 1000).coerceAtLeast(1)
+        } else {
+            0
+        }
+    }
+
+    private fun updateButtonState() {
+        val descriptionLength = findViewById<EditText>(R.id.editText).text.length
+        val isValidLength = descriptionLength in 1..MAX_DESCRIPTION_LENGTH
+        val isCooldownOver = !isCooldownActive()
+        sendButton.isEnabled = isValidLength && isCooldownOver
+        sendButton.alpha = if (isValidLength && isCooldownOver) 1f else 0.5f
+    }
+
+    private fun startCooldownTimer() {
+        if (isCooldownActive()) {
+            val remainingTime = SPAM_COOLDOWN_MS - (System.currentTimeMillis() - getLastReportTime())
+            handler.postDelayed({
+                updateButtonState()
+            }, remainingTime)
         }
     }
 
@@ -138,7 +209,7 @@ class BugReportActivity : AppCompatActivity() {
                 }
 
                 // Set up connection
-                connection = (URL(serverUrl).openConnection() as HttpURLConnection).apply {
+                connection = (URL(BUG_REPORT_API).openConnection() as HttpURLConnection).apply {
                     requestMethod = "POST"
                     doOutput = true
                     setRequestProperty("Content-Type", "application/json; charset=UTF-8")
@@ -199,5 +270,11 @@ class BugReportActivity : AppCompatActivity() {
 
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // Clean up handler callbacks to prevent memory leaks
+        handler.removeCallbacksAndMessages(null)
     }
 }

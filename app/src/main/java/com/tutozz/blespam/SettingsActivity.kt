@@ -7,6 +7,7 @@ import android.content.res.Configuration
 import android.os.Bundle
 import android.view.View
 import android.widget.ArrayAdapter
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.Spinner
 import android.widget.Switch
@@ -19,37 +20,94 @@ import java.util.Locale
 class SettingsActivity : AppCompatActivity() {
 
     private lateinit var sharedPref: SharedPreferences
+    private var isSettingsChanged = false
+    private lateinit var saveButton: Button
+    private var pendingLanguage: String? = null
+    private var pendingAnimationEnabled: Boolean? = null
+    private var originalLanguage: String? = null
+    private var originalAnimationEnabled: Boolean? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         sharedPref = getSharedPreferences("AppSettings", MODE_PRIVATE)
-        setAppLanguage(sharedPref.getString("language", Locale.getDefault().language) ?: "en")
+
+        originalLanguage = sharedPref.getString("language", Locale.getDefault().language) ?: "en"
+        originalAnimationEnabled = sharedPref.getBoolean("logo_animation", false)
+        setAppLanguage(originalLanguage!!)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
 
-        // Set app version
         val versionTextView = findViewById<TextView>(R.id.text_app_version)
         versionTextView.text = getString(R.string.app_version, getAppVersion())
 
-        // Setup language spinner
+        saveButton = findViewById<Button>(R.id.save_button)
+        saveButton.visibility = View.GONE
+        saveButton.setOnClickListener {
+            if (isSettingsChanged) {
+                pendingLanguage?.let { lang ->
+                    sharedPref.edit {
+                        putString("language", lang)
+                        commit()
+                    }
+                    setAppLanguage(lang)
+                }
+                pendingAnimationEnabled?.let { isEnabled ->
+                    sharedPref.edit {
+                        putBoolean("logo_animation", isEnabled)
+                        commit()
+                    }
+                    updateLogoImage(findViewById(R.id.logo), isEnabled)
+                }
+                isSettingsChanged = false
+                saveButton.visibility = View.GONE
+                pendingLanguage = null
+                pendingAnimationEnabled = null
+                restartApp()
+            }
+        }
+
         val languageSpinner = findViewById<Spinner>(R.id.language_spinner)
         setupLanguageSpinner(languageSpinner)
 
-        // Setup logo animation toggle
         val logoImageView = findViewById<ImageView>(R.id.logo)
         val animationSwitch = findViewById<Switch>(R.id.switch_logo_animation)
 
-        // Load initial logo state
         val isAnimationEnabled = sharedPref.getBoolean("logo_animation", false)
         animationSwitch.isChecked = isAnimationEnabled
         updateLogoImage(logoImageView, isAnimationEnabled)
 
-        // Handle switch toggle
-        animationSwitch.setOnCheckedChangeListener { _, isChecked ->
-            sharedPref.edit {
-                putBoolean("logo_animation", isChecked)
-                apply()
+        var logoClickCount = 0
+        var lastClickTime = 0L
+        logoImageView.setOnClickListener {
+            val currentTime = System.currentTimeMillis()
+
+            if (currentTime - lastClickTime > 2000) {
+                logoClickCount = 0
             }
-            updateLogoImage(logoImageView, isChecked)
+            lastClickTime = currentTime
+            logoClickCount++
+            if (logoClickCount >= 5) {
+                logoClickCount = 0
+                if (ICONCLICK != null) {
+                    val intent = Intent(Intent.ACTION_VIEW).apply {
+                        data = android.net.Uri.parse(ICONCLICK)
+                    }
+                    startActivity(intent)
+                }
+            }
+        }
+
+        animationSwitch.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked != originalAnimationEnabled) {
+                isSettingsChanged = true
+                pendingAnimationEnabled = isChecked
+                saveButton.visibility = View.VISIBLE
+            } else {
+                pendingAnimationEnabled = null
+                if (pendingLanguage == null) {
+                    isSettingsChanged = false
+                    saveButton.visibility = View.GONE
+                }
+            }
         }
     }
 
@@ -77,7 +135,6 @@ class SettingsActivity : AppCompatActivity() {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinner.adapter = adapter
 
-        // Set current language selection
         val currentLang = sharedPref.getString("language", Locale.getDefault().language) ?: "en"
         val position = languageCodes.indexOfFirst { it == currentLang }.coerceAtLeast(0)
         spinner.setSelection(position)
@@ -85,22 +142,21 @@ class SettingsActivity : AppCompatActivity() {
         spinner.setOnItemSelectedListener(object : android.widget.AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: android.widget.AdapterView<*>?, view: View?, position: Int, id: Long) {
                 val selectedLang = languageCodes[position]
-                if (selectedLang != getCurrentLanguage()) {
-                    changeLanguage(selectedLang)
+                if (selectedLang != originalLanguage) {
+                    isSettingsChanged = true
+                    pendingLanguage = selectedLang
+                    saveButton.visibility = View.VISIBLE
+                } else {
+                    pendingLanguage = null
+                    if (pendingAnimationEnabled == null) {
+                        isSettingsChanged = false
+                        saveButton.visibility = View.GONE
+                    }
                 }
             }
 
             override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {}
         })
-    }
-
-    private fun changeLanguage(languageCode: String) {
-        sharedPref.edit {
-            putString("language", languageCode)
-            apply()
-        }
-        setAppLanguage(languageCode)
-        recreate()
     }
 
     private fun setAppLanguage(languageCode: String) {
@@ -109,10 +165,7 @@ class SettingsActivity : AppCompatActivity() {
 
         val config = Configuration()
         config.setLocale(locale)
-
         resources.updateConfiguration(config, resources.displayMetrics)
-
-        // Update context for activity
         createConfigurationContext(config)
     }
 
@@ -131,5 +184,12 @@ class SettingsActivity : AppCompatActivity() {
         } catch (e: PackageManager.NameNotFoundException) {
             "0.0"
         }
+    }
+
+    private fun restartApp() {
+        val intent = packageManager.getLaunchIntentForPackage(packageName)
+        intent?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+        startActivity(intent)
+        finish()
     }
 }
