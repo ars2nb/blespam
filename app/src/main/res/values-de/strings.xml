@@ -119,4 +119,6 @@
     <string name="bluetooth_permission_denied">Bluetooth-Zugang ist nicht gewährt</string>
     <string name="permissions_denied">Zugang ist nicht gewährt</string>
     <string name="no_browser_found">Keine Browser gefunden</string>
+    <string name="save">Speichern</string>
+    <string name="cooldown_error">Bitte warten Sie %d Sekunden, bevor Sie einen weiteren Bericht senden.</string>
 </resources>

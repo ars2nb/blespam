@@ -118,5 +118,7 @@
     <string name="storage_permission_denied">未授予存储权限</string>
     <string name="bluetooth_permission_denied">未授予蓝牙权限</string>
     <string name="permissions_denied">未授予权限</string>
-    <string name="no_browser_found">未找到浏览器</string>。
+    <string name="no_browser_found">未找到浏览器</string>
+    <string name="save">保存</string>
+    <string name="cooldown_error">请等待 %d 秒后再发送另一份报告。</string>
 </resources>

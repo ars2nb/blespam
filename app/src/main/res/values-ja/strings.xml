@@ -118,5 +118,7 @@
     <string name="storage_permission_denied">ストレージへの権限が付与されていません</string>
     <string name="bluetooth_permission_denied">Bluetoothの権限が付与されていません</string>
     <string name="permissions_denied">権限が付与されていません</string>
-    <string name="no_browser_found">ブラウザが見つかりません</string>。
+    <string name="no_browser_found">ブラウザが見つかりません</string>
+    <string name="save">保存</string>
+    <string name="cooldown_error">次のレポートを送信する前に、%d秒お待ちください。</string>
 </resources>

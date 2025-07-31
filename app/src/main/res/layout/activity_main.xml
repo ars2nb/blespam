@@ -315,9 +315,10 @@
                     android:onClick="openSocialLink" />
 
             </LinearLayout>
-
         </LinearLayout>
     </ScrollView>
+
+
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -359,6 +360,7 @@
                 android:textSize="15sp"
                 tools:ignore="TouchTargetSizeCheck" />
         </LinearLayout>
+
 
     </FrameLayout>
 </RelativeLayout>

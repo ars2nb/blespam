@@ -142,4 +142,6 @@
     <string name="bluetooth_permission_denied">Bluetooth permission is not granted</string>
     <string name="permissions_denied">permission is not granted</string>
     <string name="no_browser_found">No browsers found</string>
+    <string name="save">Save</string>
+    <string name="cooldown_error">Please wait %d seconds before sending another report.</string>
 </resources>

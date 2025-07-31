@@ -119,4 +119,6 @@
     <string name="bluetooth_permission_denied">El permiso de Bluetooth no está concedido</string>
     <string name="permissions_denied">El permiso no está concedido</string>
     <string name="no_browser_found">No se han encontrado navegadores</string>
+    <string name="save">Guardar</string>
+    <string name="cooldown_error">Por favor, espere %d segundos antes de enviar otro informe.</string>
 </resources>

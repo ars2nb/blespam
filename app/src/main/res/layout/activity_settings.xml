@@ -88,9 +88,9 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/logo_animation"
-            android:textSize="16sp"
-            android:textColor="#333333"
-            android:fontFamily="sans-serif" />
+                android:textSize="16sp"
+                android:textColor="#333333"
+                android:fontFamily="sans-serif" />
 
             <Switch
                 android:id="@+id/switch_logo_animation"
@@ -106,6 +106,25 @@
 
         </LinearLayout>
     </androidx.cardview.widget.CardView>
+
+    <!-- Save Button -->
+    <Button
+        android:id="@+id/save_button"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:text="@string/save"
+        android:background="@drawable/button_gradient"
+        android:textColor="#FFFFFF"
+        android:textAllCaps="false"
+        android:textSize="16sp"
+        android:fontFamily="sans-serif-medium"
+        android:elevation="6dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="24dp"
+        android:paddingHorizontal="16dp"
+        android:stateListAnimator="@anim/button_elevation"
+        android:foreground="?android:attr/selectableItemBackground"
+        android:visibility="gone" />
 
     <!-- Spacer -->
     <Space

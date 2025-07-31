@@ -108,7 +108,7 @@
         <string name="download_title">Обновление BLE Spam</string>
         <string name="download_description">Загрузка версии %1$s</string>
         <string name="progress_text">%1$d%% (%2$d КБ/c)</string>
-        <string name="delay_text">%1$d мс</string>
+        <string name="delay_text">%1$dms</string>
     <string name="download_paused">Загрузка приостановлена</string>
     <string name="download_pending">Загрузка отложена</string>
     <string name="invalid_file_path">Неправильный путь к файлу</string>
@@ -118,5 +118,7 @@
     <string name="storage_permission_denied">Празрешение на хранение не предоставлено</string>
     <string name="bluetooth_permission_denied">Разрешение на Bluetooth не предоставлено</string>
     <string name="permissions_denied">Разрешение не предоставлено</string>
-    <string name="no_browser_found">Не найдено ни одного браузера</string>.
+    <string name="no_browser_found">Не найдено ни одного браузера</string>
+    <string name="save">Сохранить</string>
+    <string name="cooldown_error">Пожалуйста, подождите %d секунд, прежде чем отправлять другой отчет.</string>
 </resources>

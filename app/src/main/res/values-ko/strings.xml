@@ -119,4 +119,6 @@
     <string name="bluetooth_permission_denied">블루투스 권한이 부여되지 않았습니다</string>
     <string name="permissions_denied">권한이 부여되지 않았습니다</string>
     <string name="no_browser_found">찾은 브라우저가 없습니다</string>
+    <string name="save">저장</string>
+    <string name="cooldown_error">다음 보고서를 보내기 전에 %d 초 동안 기다려 주시기 바랍니다.</string>
 </resources>
