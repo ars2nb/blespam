@@ -11,8 +11,8 @@ android {
         applicationId = "com.tutozz.blespam"
         minSdk = 21
         targetSdk = 34
-        versionCode = 7
-        versionName = "2.7"
+        versionCode = 11
+        versionName = "2.9"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
@@ -62,7 +62,7 @@ android {
 }
 
 dependencies {
-    implementation("pl.droidsonroids.gif:android-gif-drawable:1.2.28")
+    implementation("pl.droidsonroids.gif:android-gif-drawable:1.2.29")
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     implementation("com.github.bumptech.glide:glide:4.16.0")
