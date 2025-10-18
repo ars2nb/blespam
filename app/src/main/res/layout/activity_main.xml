@@ -10,8 +10,8 @@
     <!-- Settings Menu Icon -->
     <ImageView
         android:id="@+id/settingsButton"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:layout_alignParentEnd="true"
         android:layout_alignParentTop="true"
         android:layout_marginTop="8dp"
@@ -131,6 +131,38 @@
 
                 <ImageView
                     android:id="@+id/appleDevicePopupCircle"
+                    android:layout_width="10dp"
+                    android:layout_height="10dp"
+                    android:layout_gravity="top|end"
+                    android:layout_marginTop="26dp"
+                    android:layout_marginEnd="20dp"
+                    android:contentDescription="@string/blink_indicator"
+                    android:elevation="10dp"
+                    android:src="@drawable/grey_circle"
+                    tools:ignore="ImageContrastCheck" />
+            </FrameLayout>
+
+            <!-- Apple Device Popup Button -->
+            <FrameLayout
+                android:id="@+id/appleNotYourDevicePopupButtonLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp">
+
+                <Button
+                    android:id="@+id/appleNotYourDevicePopupButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="60dp"
+                    android:layout_marginEnd="5dp"
+                    android:backgroundTint="@color/empty"
+                    android:paddingStart="15dp"
+                    android:paddingEnd="35dp"
+                    android:text="@string/apple_notyour_device_popup"
+                    android:fontFamily="@font/notosans_extrabold"
+                    android:textColor="@color/black" />
+
+                <ImageView
+                    android:id="@+id/appleNotYourDevicePopupCircle"
                     android:layout_width="10dp"
                     android:layout_height="10dp"
                     android:layout_gravity="top|end"

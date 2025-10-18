@@ -1,41 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">
-        <b>BLE Spam</b>
-    </string>
+    <string name="app_name">BLE Spam</string>
     <string name="permission_granted">許可された</string>
     <string name="permission_required">許可が必要です</string>
     <string name="ok">ok</string>
-    <string name="samsung_easypair_watch">
-        <b>Samsung EasyPair Watch</b>
-    </string>
-    <string name="windows_swiftpair">
-        <b>Windows SwiftPair</b>
-    </string>
-    <string name="samsung_easypair_buds">
-        <b>Samsung EasyPair Buds</b>
-    </string>
-    <string name="android_fastpair">
-        <b>Android FastPair</b>
-    </string>
-    <string name="apple_device_popup">
-        <b>Apple Device Popup</b>
-    </string>
-    <string name="apple_action_modal">
-        <b>Apple Action Modal</b>
-    </string>
-    <string name="ios_17_crash">
-        <b>iOS 17 Crash</b>
-    </string>
-    <string name="ios_title">
-        <b>iOS</b>
-    </string>
-    <string name="android_title">
-        <b>Android and Samsung</b>
-    </string>
-    <string name="windows_title">
-        <b>Windows</b>
-    </string>
+    <string name="samsung_easypair_watch">Samsung EasyPair Watch</string>
+    <string name="windows_swiftpair">Windows SwiftPair</string>
+    <string name="samsung_easypair_buds">Samsung EasyPair Buds</string>
+    <string name="android_fastpair">Android FastPair</string>
+    <string name="apple_device_popup">Device Popup</string>
+    <string name="apple_notyour_device_popup">Not Your Device Popup</string>
+    <string name="apple_action_modal">Action Modal</string>
+    <string name="ios_17_crash">iOS 17 Crash</string>
+    <string name="ios_title">iOS</string>
+    <string name="android_title">Android and Samsung</string>
+    <string name="windows_title">Windows</string>
     <string name="thanks_to_willy_jl_spooks4576_and_ecto_1a">Willy-JL、@Spooks4576、@ECTO-1Aに感謝します</string>
     <string name="dev_by_tutozz_and_ars3nb">@tutozz, @ars3nb(@ars2nb) による開発</string>
     <string name="todo">TODO</string>
@@ -121,4 +100,12 @@
     <string name="no_browser_found">ブラウザが見つかりません</string>
     <string name="save">保存</string>
     <string name="cooldown_error">次のレポートを送信する前に、%d秒お待ちください。</string>
+    <string name="theme">テーマ</string>
+    <string name="theme_auto">自動 (デバイステーマ)</string>
+    <string name="theme_light">明るい</string>
+    <string name="theme_dark">暗い</string>
+    <string name="all_spammers_stopped">すべてのスパマーが停止しました</string>
+    <string name="unknown_command">不明なコマンド</string>
+    <string name="spammer_started">スパマー %s が開始されました</string>
+    <string name="spammer_not_found">スパマーが見つかりません</string>
 </resources>

@@ -1,41 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">
-        <b>BLE Spam</b>
-    </string>
+    <string name="app_name">BLE Spam</string>
     <string name="permission_granted">Erlaubnis erteilt</string>
     <string name="permission_required">Erlaubnis erforderlich</string>
     <string name="ok">ok</string>
-    <string name="samsung_easypair_watch">
-        <b>Samsung EasyPair Watch</b>
-    </string>
-    <string name="windows_swiftpair">
-        <b>Windows SwiftPair</b>
-    </string>
-    <string name="samsung_easypair_buds">
-        <b>Samsung EasyPair Buds</b>
-    </string>
-    <string name="android_fastpair">
-        <b>Android FastPair</b>
-    </string>
-    <string name="apple_device_popup">
-        <b>Apple Device Popup</b>
-    </string>
-    <string name="apple_action_modal">
-        <b>Apple Action Modal</b>
-    </string>
-    <string name="ios_17_crash">
-        <b>iOS 17 Crash</b>
-    </string>
-    <string name="ios_title">
-        <b>iOS</b>
-    </string>
-    <string name="android_title">
-        <b>Android and Samsung</b>
-    </string>
-    <string name="windows_title">
-        <b>Windows</b>
-    </string>
+    <string name="samsung_easypair_watch">Samsung EasyPair Watch</string>
+    <string name="windows_swiftpair">Windows SwiftPair</string>
+    <string name="samsung_easypair_buds">Samsung EasyPair Buds</string>
+    <string name="android_fastpair">Android FastPair</string>
+    <string name="apple_device_popup">Device Popup</string>
+    <string name="apple_notyour_device_popup">Not Your Device Popup</string>
+    <string name="apple_action_modal">Action Modal</string>
+    <string name="ios_17_crash">iOS 17 Crash</string>
+    <string name="ios_title">iOS</string>
+    <string name="android_title">Android and Samsung</string>
+    <string name="windows_title">Windows</string>
     <string name="thanks_to_willy_jl_spooks4576_and_ecto_1a">Dank an @Willy-JL, @Spooks4576, @ECTO-1A</string>
     <string name="dev_by_tutozz_and_ars3nb">Dev von @tutozz, @ars3nb(@ars2nb)</string>
     <string name="todo">TODO</string>
@@ -121,4 +100,12 @@
     <string name="no_browser_found">Keine Browser gefunden</string>
     <string name="save">Speichern</string>
     <string name="cooldown_error">Bitte warten Sie %d Sekunden, bevor Sie einen weiteren Bericht senden.</string>
+    <string name="theme">Тема</string>
+    <string name="theme_auto">Auto (Gerätethema)</string>
+    <string name="theme_light">Hell</string>
+    <string name="theme_dark">Dunkel</string>
+    <string name="all_spammers_stopped">Alle Spammer gestoppt</string>
+    <string name="unknown_command">Unbekannter Befehl</string>
+    <string name="spammer_started">Spammer %s gestartet</string>
+    <string name="spammer_not_found">Spammer nicht gefunden</string>
 </resources>

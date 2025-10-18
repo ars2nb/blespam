@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <style name="Theme.BLESpam" parent="Theme.MaterialComponents.Light.NoActionBar">
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Theme.BLESpam" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="colorPrimary">#F9772F</item>
         <item name="colorPrimaryVariant">#A14B1C</item>
         <item name="colorOnPrimary">@color/white</item>
         <item name="colorSecondary">#000000</item>
         <item name="colorSecondaryVariant">#000000</item>
         <item name="colorOnSecondary">@color/white</item>
-        <item name="android:statusBarColor">#F5F5F5</item>
+
+        <!-- Цвет статус-бара -->
+        <item name="android:statusBarColor">@color/white</item>
+
+        <item name="android:windowLightStatusBar" tools:targetApi="23">true</item>
     </style>
 </resources>

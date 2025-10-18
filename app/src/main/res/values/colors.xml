@@ -15,4 +15,14 @@
     <color name="switch_track_color">#FFB300</color>
     <color name="switch_thumb_disabled">#B0BEC5</color>
     <color name="switch_track_disabled">#E0E0E0</color>
+
+    <!-- Settings -->
+    <color name="background_sa">#FFE0B2</color>
+    <color name="text_primary_sa">#333333</color>
+    <color name="text_secondary_sa">#666666</color>
+    <color name="button_text_sa">#FFFFFF</color>
+    <color name="card_background_sa">#FFFFFF</color>
+    <color name="spinner_popup_background_sa">#FFFFFF</color>
+    <color name="switch_thumb_color_sa">#FFFFFF</color>
+    <color name="switch_track_color_sa">#B0B0B0</color>
 </resources>
