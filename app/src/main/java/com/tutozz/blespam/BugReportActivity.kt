@@ -8,11 +8,12 @@ import android.os.Handler
 import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.tutozz.blespam.AppConfig.BUG_REPORT_API
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -26,17 +27,18 @@ import java.util.*
 class BugReportActivity : AppCompatActivity() {
 
     private val MAX_DESCRIPTION_LENGTH = 1000
-    private val SPAM_COOLDOWN_MS = 60_000L // 1 minute in milliseconds
+    private val SPAM_COOLDOWN_MS = 60_000L
     private val PREFS_NAME = "BugReportPrefs"
     private val PREF_LAST_REPORT_TIME = "lastReportTime"
     private lateinit var sendButton: Button
+    private lateinit var errorText: TextView
     private val handler = Handler(Looper.getMainLooper())
 
     private fun getAppLanguage(): String {
         val prefs = getSharedPreferences("AppSettings", Context.MODE_PRIVATE)
-        // Replace "app_language" with the key used to store the app's language preference
-        // Default to "en" (English) or another fallback if not set
-        return prefs.getString("app_language", "en") ?: "en"
+        val language = prefs.getString("language", "en") ?: "en"
+        // Validate language code (ensure it’s a 2- or 3-letter ISO 639-1 code)
+        return if (language.matches(Regex("[a-z]{2,3}"))) language else "en"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,6 +49,7 @@ class BugReportActivity : AppCompatActivity() {
         val reportEditText = findViewById<EditText>(R.id.editText)
         sendButton = findViewById<Button>(R.id.sendButton)
         val charCountText = findViewById<TextView>(R.id.charCountText)
+        errorText = findViewById<TextView>(R.id.errorText)
 
         charCountText.text = getString(R.string.char_counter_format, 0, MAX_DESCRIPTION_LENGTH)
 
@@ -76,6 +79,8 @@ class BugReportActivity : AppCompatActivity() {
                         updateButtonState()
                     }
                 }
+                // Clear error text when user types
+                clearError()
             }
 
             override fun afterTextChanged(s: Editable?) {}
@@ -85,19 +90,19 @@ class BugReportActivity : AppCompatActivity() {
             val description = reportEditText.text.toString().trim()
 
             if (description.isEmpty()) {
-                showToast(getString(R.string.error_empty_description))
+                showError(getString(R.string.error_empty_description))
                 return@setOnClickListener
             }
 
             if (description.length > MAX_DESCRIPTION_LENGTH) {
-                showToast(getString(R.string.char_limit_exceeded, MAX_DESCRIPTION_LENGTH))
+                showError(getString(R.string.char_limit_exceeded, MAX_DESCRIPTION_LENGTH))
                 return@setOnClickListener
             }
 
             // Check cooldown before sending
             if (isCooldownActive()) {
                 val remainingSeconds = getRemainingCooldownSeconds()
-                showToast(getString(R.string.cooldown_error, remainingSeconds))
+                showError(getString(R.string.cooldown_error, remainingSeconds))
                 return@setOnClickListener
             }
 
@@ -110,6 +115,7 @@ class BugReportActivity : AppCompatActivity() {
 
                     sendButton.isEnabled = false
                     sendButton.text = getString(R.string.sending_button_text)
+                    clearError()
 
                     val success = sendReportToServer(
                         description = description,
@@ -122,13 +128,16 @@ class BugReportActivity : AppCompatActivity() {
                     if (success) {
                         // Save the timestamp of the successful report
                         saveLastReportTime()
-                        showToast(getString(R.string.report_sent_success))
+                        // Show success message
+                        errorText.text = getString(R.string.report_sent_success)
+                        errorText.setTextColor(Color.parseColor("#008000")) // Green for success
+                        errorText.visibility = View.VISIBLE
                         reportEditText.text.clear()
-                        // Navigate back to previous screen
-                        finish()
+                        // Navigate back to previous screen after a short delay
+                        handler.postDelayed({ finish() }, 2000)
                     }
                 } catch (e: Exception) {
-                    showToast(getString(R.string.connection_error, e.message ?: getString(R.string.unknown_error)))
+                    showError(getString(R.string.connection_error, e.message ?: getString(R.string.unknown_error)))
                 } finally {
                     sendButton.text = getString(R.string.send_button_text)
                     updateButtonState()
@@ -253,13 +262,13 @@ class BugReportActivity : AppCompatActivity() {
                 } else {
                     val errorMessage = jsonResponse.optString("message", "Server error: $responseCode")
                     withContext(Dispatchers.Main) {
-                        showToast(getString(R.string.server_error, errorMessage))
+                        showError(getString(R.string.server_error, errorMessage))
                     }
                     false
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    showToast(getString(R.string.connection_error, e.message ?: getString(R.string.unknown_error)))
+                    showError(getString(R.string.connection_error, e.message ?: getString(R.string.unknown_error)))
                 }
                 false
             } finally {
@@ -268,8 +277,17 @@ class BugReportActivity : AppCompatActivity() {
         }
     }
 
-    private fun showToast(message: String) {
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+    private fun showError(message: String) {
+        errorText.text = message
+        errorText.setTextColor(Color.RED)
+        errorText.visibility = View.VISIBLE
+        // Optionally clear the error after a delay
+        handler.postDelayed({ clearError() }, 5000)
+    }
+
+    private fun clearError() {
+        errorText.text = ""
+        errorText.visibility = View.GONE
     }
 
     override fun onDestroy() {

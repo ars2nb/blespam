@@ -14,6 +14,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import java.util.Locale
@@ -29,8 +30,14 @@ class SplashActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Инициализация языка перед setContentView
+        // Применить тему И язык перед super.onCreate()
         sharedPref = getSharedPreferences("AppSettings", MODE_PRIVATE)
+
+        // Применяем тему
+        val theme = sharedPref.getString("theme", "auto") ?: "auto"
+        setAppTheme(theme)
+
+        // Применяем язык
         val languageCode = sharedPref.getString("language", Locale.getDefault().language) ?: "en"
         setAppLanguage(languageCode)
 
@@ -56,6 +63,14 @@ class SplashActivity : AppCompatActivity() {
             .into(gifImageView)
 
         versionTextView.text = getString(R.string.app_version, BuildConfig.VERSION_NAME)
+    }
+
+    private fun setAppTheme(theme: String) {
+        when (theme) {
+            "light" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+            "dark" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+            else -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+        }
     }
 
     private fun setAppLanguage(languageCode: String) {

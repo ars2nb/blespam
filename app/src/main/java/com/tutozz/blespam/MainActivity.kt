@@ -1,12 +1,14 @@
 package com.tutozz.blespam
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.bluetooth.BluetoothAdapter
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.graphics.Paint
 import android.net.ConnectivityManager
 import android.net.Uri
@@ -29,6 +31,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.bumptech.glide.Glide
@@ -41,6 +44,8 @@ import java.io.InputStream
 import java.net.URL
 import javax.net.ssl.HttpsURLConnection
 import androidx.core.app.ActivityCompat
+import com.tutozz.blespam.AppConfig.SOCIAL_LINK
+import com.tutozz.blespam.AppConfig.VERSION_CHECK_API
 
 class MainActivity : AppCompatActivity() {
 
@@ -181,7 +186,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    
+
 
     private fun hasEnoughStorage(): Boolean {
         val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
@@ -397,6 +402,7 @@ class MainActivity : AppCompatActivity() {
         progressHandler.removeCallbacksAndMessages(null)
     }
 
+    @SuppressLint("StringFormatInvalid")
     private fun installApk(uri: Uri) {
         Log.d("BLESpam", "Installing APK with URI: $uri, Scheme: ${uri.scheme}")
         try {
@@ -589,14 +595,23 @@ class MainActivity : AppCompatActivity() {
         return blinkRunnable
     }
 
+    @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Применить тему из настроек ПЕРЕД super.onCreate()
+        sharedPref = getSharedPreferences("AppSettings", MODE_PRIVATE)
+        val theme = sharedPref.getString("theme", "auto") ?: "auto"
+        setAppTheme(theme)
+
         super.onCreate(savedInstanceState)
 
-        sharedPref = getSharedPreferences("AppSettings", MODE_PRIVATE)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         val bugButton: ImageView = findViewById(R.id.settingsButton)
+        // Теперь проверяем текущую тему приложения, а не системную
+        val isDarkTheme = isAppInDarkTheme()
+        // Set the appropriate icon based on the theme
+        bugButton.setImageResource(if (isDarkTheme) R.mipmap.ic_menu_night else R.mipmap.ic_menu)
         bugButton.setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
@@ -626,11 +641,41 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+
+    private fun setAppTheme(theme: String) {
+        when (theme) {
+            "light" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+            "dark" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+            else -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+        }
+    }
+
+    private fun isAppInDarkTheme(): Boolean {
+        return when (AppCompatDelegate.getDefaultNightMode()) {
+            AppCompatDelegate.MODE_NIGHT_YES -> true
+            AppCompatDelegate.MODE_NIGHT_NO -> false
+            AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM -> {
+                (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+            }
+            else -> {
+                (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+            }
+        }
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        val bugButton: ImageView = findViewById(R.id.settingsButton)
+        val isDarkTheme = (newConfig.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+        bugButton.setImageResource(if (isDarkTheme) R.mipmap.ic_menu_night else R.mipmap.ic_menu)
+    }
+
     private fun initializeSpamButtons() {
         try {
             onClickSpamButton(ContinuitySpam(ContinuityDevice.type.ACTION, true), binding.ios17CrashButton, binding.ios17CrashCircle)
             onClickSpamButton(ContinuitySpam(ContinuityDevice.type.ACTION, false), binding.appleActionModalButton, binding.appleActionModalCircle)
             onClickSpamButton(ContinuitySpam(ContinuityDevice.type.DEVICE, false), binding.appleDevicePopupButton, binding.appleDevicePopupCircle)
+            onClickSpamButton(ContinuitySpam(ContinuityDevice.type.NOTYOURDEVICE, false), binding.appleNotYourDevicePopupButton, binding.appleNotYourDevicePopupCircle)
             onClickSpamButton(FastPairSpam(), binding.androidFastPairButton, binding.androidFastPairCircle)
             onClickSpamButton(EasySetupSpam(EasySetupDevice.type.BUDS), binding.samsungEasyPairBudsButton, binding.samsungEasyPairBudsCircle)
             onClickSpamButton(EasySetupSpam(EasySetupDevice.type.WATCH), binding.samsungEasyPairWatchButton, binding.samsungEasyPairWatchCircle)

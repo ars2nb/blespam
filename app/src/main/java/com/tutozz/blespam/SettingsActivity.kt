@@ -13,6 +13,7 @@ import android.widget.Spinner
 import android.widget.Switch
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.edit
 import com.bumptech.glide.Glide
 import java.util.Locale
@@ -24,15 +25,20 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var saveButton: Button
     private var pendingLanguage: String? = null
     private var pendingAnimationEnabled: Boolean? = null
+    private var pendingTheme: String? = null
     private var originalLanguage: String? = null
     private var originalAnimationEnabled: Boolean? = null
+    private var originalTheme: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         sharedPref = getSharedPreferences("AppSettings", MODE_PRIVATE)
 
         originalLanguage = sharedPref.getString("language", Locale.getDefault().language) ?: "en"
         originalAnimationEnabled = sharedPref.getBoolean("logo_animation", false)
+        originalTheme = sharedPref.getString("theme", "auto") ?: "auto"
         setAppLanguage(originalLanguage!!)
+        setAppTheme(originalTheme!!)
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
 
@@ -57,16 +63,27 @@ class SettingsActivity : AppCompatActivity() {
                     }
                     updateLogoImage(findViewById(R.id.logo), isEnabled)
                 }
+                pendingTheme?.let { theme ->
+                    sharedPref.edit {
+                        putString("theme", theme)
+                        commit()
+                    }
+                    setAppTheme(theme)
+                }
                 isSettingsChanged = false
                 saveButton.visibility = View.GONE
                 pendingLanguage = null
                 pendingAnimationEnabled = null
+                pendingTheme = null
                 restartApp()
             }
         }
 
         val languageSpinner = findViewById<Spinner>(R.id.language_spinner)
         setupLanguageSpinner(languageSpinner)
+
+        val themeSpinner = findViewById<Spinner>(R.id.theme_spinner)
+        setupThemeSpinner(themeSpinner)
 
         val logoImageView = findViewById<ImageView>(R.id.logo)
         val animationSwitch = findViewById<Switch>(R.id.switch_logo_animation)
@@ -75,26 +92,16 @@ class SettingsActivity : AppCompatActivity() {
         animationSwitch.isChecked = isAnimationEnabled
         updateLogoImage(logoImageView, isAnimationEnabled)
 
-        var logoClickCount = 0
         var lastClickTime = 0L
         logoImageView.setOnClickListener {
             val currentTime = System.currentTimeMillis()
-
-            if (currentTime - lastClickTime > 2000) {
-                logoClickCount = 0
+            if (currentTime - lastClickTime < 500) {
+                val intent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse(AppConfig.ICONCLICK))
+                startActivity(intent)
             }
             lastClickTime = currentTime
-            logoClickCount++
-            if (logoClickCount >= 5) {
-                logoClickCount = 0
-                if (ICONCLICK != null) {
-                    val intent = Intent(Intent.ACTION_VIEW).apply {
-                        data = android.net.Uri.parse(ICONCLICK)
-                    }
-                    startActivity(intent)
-                }
-            }
         }
+
 
         animationSwitch.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked != originalAnimationEnabled) {
@@ -103,11 +110,54 @@ class SettingsActivity : AppCompatActivity() {
                 saveButton.visibility = View.VISIBLE
             } else {
                 pendingAnimationEnabled = null
-                if (pendingLanguage == null) {
-                    isSettingsChanged = false
-                    saveButton.visibility = View.GONE
+                checkIfSettingsChanged()
+            }
+        }
+    }
+
+    private fun setupThemeSpinner(spinner: Spinner) {
+        val themeCodes = resources.getStringArray(R.array.theme_codes)
+        val themeNames = resources.getStringArray(R.array.theme_names)
+
+        val adapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_spinner_item,
+            themeNames
+        )
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinner.adapter = adapter
+
+        val currentTheme = sharedPref.getString("theme", "auto") ?: "auto"
+        val position = themeCodes.indexOfFirst { it == currentTheme }.coerceAtLeast(0)
+        spinner.setSelection(position)
+
+        spinner.setOnItemSelectedListener(object : android.widget.AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: android.widget.AdapterView<*>?, view: View?, position: Int, id: Long) {
+                val selectedTheme = themeCodes[position]
+                if (selectedTheme != originalTheme) {
+                    isSettingsChanged = true
+                    pendingTheme = selectedTheme
+                    saveButton.visibility = View.VISIBLE
+                } else {
+                    pendingTheme = null
+                    checkIfSettingsChanged()
                 }
             }
+
+            override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {}
+        })
+    }
+
+    private fun checkIfSettingsChanged() {
+        isSettingsChanged = pendingLanguage != null || pendingAnimationEnabled != null || pendingTheme != null
+        saveButton.visibility = if (isSettingsChanged) View.VISIBLE else View.GONE
+    }
+
+    private fun setAppTheme(theme: String) {
+        when (theme) {
+            "light" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+            "dark" -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+            else -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
         }
     }
 
@@ -148,10 +198,7 @@ class SettingsActivity : AppCompatActivity() {
                     saveButton.visibility = View.VISIBLE
                 } else {
                     pendingLanguage = null
-                    if (pendingAnimationEnabled == null) {
-                        isSettingsChanged = false
-                        saveButton.visibility = View.GONE
-                    }
+                    checkIfSettingsChanged()
                 }
             }
 

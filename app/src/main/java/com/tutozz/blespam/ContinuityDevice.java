@@ -2,7 +2,7 @@ package com.tutozz.blespam;
 
 public class ContinuityDevice {
     public enum type {
-        DEVICE, ACTION
+        DEVICE, ACTION, NOTYOURDEVICE
     }
     private String value;
     private String name;
