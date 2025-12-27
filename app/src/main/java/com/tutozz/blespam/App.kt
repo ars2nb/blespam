@@ -1,4 +1,3 @@
-// App.kt
 package com.tutozz.blespam
 
 import android.app.Application

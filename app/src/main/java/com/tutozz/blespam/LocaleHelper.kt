@@ -6,11 +6,6 @@ import android.os.Build
 import java.util.Locale
 
 object LocaleHelper {
-
-    /**
-     * Возвращает Context с применённой локалью languageTag (например "ru", "en", "fr", "zh").
-     * Если languageTag == "system" или пустое — возвращает исходный context.
-     */
     fun wrapContextWithLocale(context: Context, languageTag: String?): Context {
         val lang = languageTag?.takeIf { it.isNotBlank() && it != "system" } ?: return context
 

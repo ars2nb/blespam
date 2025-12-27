@@ -16,8 +16,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
-import com.bumptech.glide.Glide
 import java.util.Locale
+import com.tutozz.blespam.R
 
 @SuppressLint("CustomSplashScreen")
 class SplashActivity : AppCompatActivity() {
@@ -30,21 +30,36 @@ class SplashActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Применить тему И язык перед super.onCreate()
+        val activeSpammers = try {
+            SpamService.getActiveSpammers()
+        } catch (e: Exception) {
+            emptySet<String>()
+        }
+
+        if (activeSpammers.isNotEmpty()) {
+            super.onCreate(savedInstanceState)
+            startActivity(Intent(this, MainActivity::class.java))
+            finish()
+            return
+        }
+
         sharedPref = getSharedPreferences("AppSettings", MODE_PRIVATE)
 
-        // Применяем тему
         val theme = sharedPref.getString("theme", "auto") ?: "auto"
         setAppTheme(theme)
 
-        // Применяем язык
         val languageCode = sharedPref.getString("language", Locale.getDefault().language) ?: "en"
         setAppLanguage(languageCode)
 
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_splash)
 
-        initViews()
+        val useMaterial = sharedPref.getBoolean("use_material", defaultUseMaterial())
+        setContentView(
+            if (useMaterial) R.layout.activity_splash_material
+            else R.layout.activity_splash_legacy
+        )
+
+        initViews(useMaterial)
 
         if (hasPermissions()) {
             proceedToMainActivity()
@@ -53,14 +68,29 @@ class SplashActivity : AppCompatActivity() {
         }
     }
 
-    private fun initViews() {
+    private fun defaultUseMaterial(): Boolean {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+    }
+
+    private fun initViews(useMaterial: Boolean) {
         val gifImageView: ImageView = findViewById(R.id.gifImageView)
         val versionTextView: TextView = findViewById(R.id.versionTextView)
 
-        Glide.with(this)
-            .asGif()
-            .load(R.drawable.anim)
-            .into(gifImageView)
+        val isDarkTheme = (resources.configuration.uiMode and
+                android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
+                android.content.res.Configuration.UI_MODE_NIGHT_YES
+
+        val animResource = if (isDarkTheme) {
+            R.drawable.anim_frames_white
+        } else {
+            R.drawable.anim_frames_black
+        }
+
+        gifImageView.setImageResource(animResource)
+
+        gifImageView.post {
+            (gifImageView.drawable as? android.graphics.drawable.AnimationDrawable)?.start()
+        }
 
         versionTextView.text = getString(R.string.app_version, BuildConfig.VERSION_NAME)
     }
@@ -81,7 +111,6 @@ class SplashActivity : AppCompatActivity() {
         config.setLocale(locale)
         resources.updateConfiguration(config, resources.displayMetrics)
 
-        // Обновляем контекст для активности
         createConfigurationContext(config)
     }
 
@@ -123,7 +152,8 @@ class SplashActivity : AppCompatActivity() {
             if (ContextCompat.checkSelfPermission(
                     this@SplashActivity,
                     Manifest.permission.ACCESS_FINE_LOCATION
-                ) != PackageManager.PERMISSION_GRANTED) {
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
                 add(Manifest.permission.ACCESS_FINE_LOCATION)
             }
 
@@ -131,7 +161,8 @@ class SplashActivity : AppCompatActivity() {
                 ContextCompat.checkSelfPermission(
                     this@SplashActivity,
                     Manifest.permission.BLUETOOTH_SCAN
-                ) != PackageManager.PERMISSION_GRANTED) {
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
                 add(Manifest.permission.BLUETOOTH_SCAN)
             }
         }
@@ -147,6 +178,6 @@ class SplashActivity : AppCompatActivity() {
         Handler(Looper.getMainLooper()).postDelayed({
             startActivity(Intent(this, MainActivity::class.java))
             finish()
-        }, 1400)
+        }, 1600)
     }
 }

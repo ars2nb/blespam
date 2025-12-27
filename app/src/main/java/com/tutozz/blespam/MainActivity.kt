@@ -1,15 +1,19 @@
 package com.tutozz.blespam
 
 import android.Manifest
+import android.R.color.black
+import android.R.color.system_accent1_500
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.bluetooth.BluetoothAdapter
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.content.res.ColorStateList
 import android.content.res.Configuration
-import android.graphics.Paint
+import android.graphics.drawable.AnimationDrawable
 import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.Build
@@ -17,6 +21,9 @@ import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
 import android.os.Looper
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
 import android.provider.Settings
 import android.util.Log
 import android.view.Gravity
@@ -29,34 +36,84 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.bumptech.glide.Glide
-import com.tutozz.blespam.databinding.ActivityMainBinding
 import org.json.JSONObject
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
 import java.net.URL
-import javax.net.ssl.HttpsURLConnection
 import androidx.core.app.ActivityCompat
-import com.tutozz.blespam.AppConfig.SOCIAL_LINK
-import com.tutozz.blespam.AppConfig.VERSION_CHECK_API
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import java.util.concurrent.TimeUnit
+import android.util.TypedValue
+import androidx.annotation.RequiresApi
+import com.tutozz.blespam.R
+import com.google.android.material.button.MaterialButton
+import android.graphics.Color
+import androidx.annotation.AttrRes
+import android.content.BroadcastReceiver
 
 class MainActivity : AppCompatActivity() {
 
-    private var hasShownUpdateDialog = false
-    private lateinit var binding: ActivityMainBinding
     private val spammerList = mutableListOf<Spammer>()
     private lateinit var sharedPref: android.content.SharedPreferences
     private lateinit var downloadProgressBar: ProgressBar
     private val progressHandler = Handler(Looper.getMainLooper())
+    private val socialLink get() = AppConfig.SOCIAL_LINK
+    private val versionCheckApi get() = AppConfig.VERSION_CHECK_API
+    private val noOpRunnable = Runnable {}
+
+    private var vibrator: Vibrator? = null
+
+    private var isBluetoothRequestPending = false
+
+    private val blinkHandler = Handler(Looper.getMainLooper())
+    private lateinit var logo: ImageView
+    private lateinit var ios17CrashButton: MaterialButton
+    private lateinit var ios17CrashCircle: ImageView
+    private lateinit var appleActionModalButton: MaterialButton
+    private lateinit var appleActionModalCircle: ImageView
+    private lateinit var appleDevicePopupButton: MaterialButton
+    private lateinit var appleDevicePopupCircle: ImageView
+    private lateinit var appleNotYourDevicePopupButton: MaterialButton
+    private lateinit var appleNotYourDevicePopupCircle: ImageView
+    private lateinit var vzhuhSpamButton: MaterialButton
+    private lateinit var vzhuhSpamCircle: ImageView
+
+    private lateinit var androidFastPairButton: MaterialButton
+    private lateinit var androidFastPairCircle: ImageView
+    private lateinit var xiaomiQuickConnectButton: MaterialButton
+    private lateinit var xiaomiQuickConnectCircle: ImageView
+    private lateinit var samsungEasyPairBudsButton: MaterialButton
+    private lateinit var samsungEasyPairBudsCircle: ImageView
+    private lateinit var samsungEasyPairWatchButton: MaterialButton
+    private lateinit var samsungEasyPairWatchCircle: ImageView
+    private lateinit var windowsSwiftPairButton: MaterialButton
+    private lateinit var windowsSwiftPairCircle: ImageView
+    private lateinit var minusDelayButton: MaterialButton
+    private lateinit var plusDelayButton: MaterialButton
+    private lateinit var delayText: TextView
+    @Volatile
+    private var uiLockedAfterStop = false
+
+
+    private val okHttpClient by lazy {
+        OkHttpClient.Builder()
+            .connectTimeout(10, TimeUnit.SECONDS)
+            .readTimeout(10, TimeUnit.SECONDS)
+            .writeTimeout(10, TimeUnit.SECONDS)
+            .build()
+    }
 
     private val enableBluetoothLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        Log.d("BLESpam", "Bluetooth enable result: ${result.resultCode}")
+        isBluetoothRequestPending = false
         if (result.resultCode == RESULT_OK) {
             Toast.makeText(this, getString(R.string.bluetoothon), Toast.LENGTH_SHORT).show()
         } else {
@@ -79,54 +136,68 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun openSocialLink(view: View) {
+    fun openSocialLink(@Suppress("UNUSED_PARAMETER") view: View) {
         try {
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(SOCIAL_LINK))
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(socialLink))
             startActivity(intent)
-        } catch (e: ActivityNotFoundException) {
+        } catch (@Suppress("UNUSED_PARAMETER") e: ActivityNotFoundException) {
             Toast.makeText(this, getString(R.string.no_browser_found), Toast.LENGTH_SHORT).show()
         }
     }
 
     private fun stopAllSpammers() {
         spammerList.forEach { spammer ->
-            if (spammer.isSpamming) {
+            if (spammer.isSpamming()) {
                 spammer.stop()
             }
         }
+        if (spammerList.none { it.isSpamming() }) {
+            SpamService.stopAllSpammers(this)
+        }
         if (!isFinishing && !isDestroyed) {
-            updateLogoAnimation()
+            logo.postDelayed({
+                updateLogoAnimation()
+            }, 100)
         }
     }
 
     private fun getAppVersion(): String {
         return try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                packageManager.getPackageInfo(packageName, PackageManager.PackageInfoFlags.of(0)).versionName
+            val packageInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                packageManager.getPackageInfo(packageName, PackageManager.PackageInfoFlags.of(0))
             } else {
                 @Suppress("DEPRECATION")
-                packageManager.getPackageInfo(packageName, 0).versionName
+                packageManager.getPackageInfo(packageName, 0)
             }
-        } catch (e: PackageManager.NameNotFoundException) {
+            packageInfo.versionName ?: "0.0"
+        } catch (@Suppress("UNUSED_PARAMETER") e: PackageManager.NameNotFoundException) {
             "0.0"
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
+    @SuppressLint("StringFormatMatches")
     private fun checkForNewVersion() {
-        Thread {
-            var connection: HttpsURLConnection? = null
-            try {
-                val url = URL(VERSION_CHECK_API)
-                val currentVersion = getAppVersion()
-                connection = url.openConnection() as HttpsURLConnection
-                connection.requestMethod = "GET"
-                connection.connectTimeout = 5000
-                connection.readTimeout = 5000
-                connection.connect()
+        if (!isNetworkAvailable()) {
+            runOnUiThread {
+                Toast.makeText(this, R.string.no_network_connection, Toast.LENGTH_SHORT).show()
+            }
+            return
+        }
 
-                if (connection.responseCode == HttpsURLConnection.HTTP_OK) {
-                    val inputStream = connection.inputStream
-                    val jsonResponse = inputStream.bufferedReader().use { it.readText() }
+        Thread {
+            try {
+                val request = Request.Builder()
+                    .url(versionCheckApi)
+                    .get()
+                    .build()
+
+                okHttpClient.newCall(request).execute().use { response ->
+                    if (!response.isSuccessful) {
+                        throw IOException("HTTP error: ${response.code}")
+                    }
+
+                    val jsonResponse = response.body.string() ?: throw IOException("Empty response")
                     val jsonObject = JSONObject(jsonResponse)
 
                     val latestVersion = jsonObject.getString("version")
@@ -136,6 +207,8 @@ class MainActivity : AppCompatActivity() {
                     val blockedVersions = jsonObject.optJSONArray("blocked_versions")?.let { jsonArray ->
                         (0 until jsonArray.length()).map { jsonArray.getString(it) }
                     } ?: emptyList()
+
+                    val currentVersion = getAppVersion()
 
                     runOnUiThread {
                         when {
@@ -167,17 +240,17 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             } catch (e: Exception) {
+                Log.e("BLESpam", "Version check failed", e)
                 runOnUiThread {
                     Toast.makeText(this, R.string.update_check_failed, Toast.LENGTH_SHORT).show()
                 }
-            } finally {
-                connection?.disconnect()
             }
         }.start()
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     private fun isNetworkAvailable(): Boolean {
-        val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val connectivityManager = getSystemService(ConnectivityManager::class.java)
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             connectivityManager.activeNetwork != null
         } else {
@@ -186,12 +259,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
-
     private fun hasEnoughStorage(): Boolean {
         val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
         val freeSpace = downloadsDir.freeSpace
-        return freeSpace > 100 * 1024 * 1024 // 100MB
+        return freeSpace > 100 * 1024 * 1024
     }
 
     private fun isValidUrl(urlString: String): Boolean {
@@ -203,6 +274,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     private fun downloadApk(downloadUrl: String, dialog: AlertDialog) {
         if (!isNetworkAvailable()) {
             runOnUiThread {
@@ -235,7 +307,6 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        // Initialize progress UI
         runOnUiThread {
             val progressContainer = dialog.findViewById<LinearLayout>(R.id.progress_container)
             if (progressContainer != null) {
@@ -248,55 +319,53 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Start download in a background thread
         Thread {
-            var connection: HttpsURLConnection? = null
-            var inputStream: InputStream? = null
             var outputStream: FileOutputStream? = null
             try {
                 val fileName = "BLESpam-${System.currentTimeMillis()}.apk"
                 val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
                 val apkFile = File(downloadsDir, fileName)
-
-                connection = URL(downloadUrl).openConnection() as HttpsURLConnection
-                connection.connectTimeout = 10000
-                connection.readTimeout = 10000
-                connection.requestMethod = "GET"
-                connection.connect()
-
-                if (connection.responseCode != HttpsURLConnection.HTTP_OK) {
-                    throw IOException("HTTP error code: ${connection.responseCode}")
-                }
-
-                val fileLength = connection.contentLengthLong
-                inputStream = connection.inputStream
                 outputStream = FileOutputStream(apkFile)
 
-                val buffer = ByteArray(4096)
-                var totalBytesRead = 0L
-                var lastUpdateTime = System.currentTimeMillis()
-                var lastBytesRead = 0L
+                val request = Request.Builder()
+                    .url(downloadUrl)
+                    .build()
 
-                while (true) {
-                    val bytesRead = inputStream.read(buffer)
-                    if (bytesRead == -1) break
-                    outputStream.write(buffer, 0, bytesRead)
-                    totalBytesRead += bytesRead
+                okHttpClient.newCall(request).execute().use { response ->
+                    if (!response.isSuccessful) {
+                        throw IOException("HTTP error code: ${response.code}")
+                    }
 
-                    val currentTime = System.currentTimeMillis()
-                    if (currentTime - lastUpdateTime >= 200) {
-                        val progress = if (fileLength > 0) ((totalBytesRead * 100) / fileLength).toInt() else 0
-                        val speed = if (currentTime > lastUpdateTime) {
-                            ((totalBytesRead - lastBytesRead) * 1000 / (currentTime - lastUpdateTime) / 1024).toInt()
-                        } else 0
+                    val body = response.body ?: throw IOException("Empty response body")
+                    val fileLength = body.contentLength()
+                    body.byteStream().use { inputStream ->
+                        val buffer = ByteArray(4096)
+                        var totalBytesRead = 0L
+                        var lastUpdateTime = System.currentTimeMillis()
+                        var lastBytesRead = 0L
 
-                        runOnUiThread {
-                            downloadProgressBar.progress = progress
-                            dialog.findViewById<TextView>(R.id.progress_text)?.text =
-                                getString(R.string.progress_text, progress, speed)
+                        while (true) {
+                            val bytesRead = inputStream.read(buffer)
+                            if (bytesRead == -1) break
+                            outputStream.write(buffer, 0, bytesRead)
+                            totalBytesRead += bytesRead
+
+                            val currentTime = System.currentTimeMillis()
+                            if (currentTime - lastUpdateTime >= 200) {
+                                val progress = if (fileLength > 0) ((totalBytesRead * 100) / fileLength).toInt() else 0
+                                val speed = if (currentTime > lastUpdateTime) {
+                                    ((totalBytesRead - lastBytesRead) * 1000 / (currentTime - lastUpdateTime) / 1024).toInt()
+                                } else 0
+
+                                runOnUiThread {
+                                    downloadProgressBar.progress = progress
+                                    dialog.findViewById<TextView>(R.id.progress_text)?.text =
+                                        getString(R.string.progress_text, progress, speed)
+                                }
+                                lastBytesRead = totalBytesRead
+                                lastUpdateTime = currentTime
+                            }
                         }
-                        lastBytesRead = totalBytesRead
-                        lastUpdateTime = currentTime
                     }
                 }
 
@@ -311,6 +380,7 @@ class MainActivity : AppCompatActivity() {
                         "${packageName}.fileprovider",
                         apkFile
                     )
+
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
                         !packageManager.canRequestPackageInstalls()
                     ) {
@@ -323,7 +393,7 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             } catch (e: Exception) {
-                Log.e("BLESpam", "Download failed: ${e.message}", e)
+                Log.e("BLESpam", "Download failed", e)
                 runOnUiThread {
                     dialog.findViewById<LinearLayout>(R.id.progress_container)?.visibility = View.GONE
                     Toast.makeText(
@@ -334,21 +404,23 @@ class MainActivity : AppCompatActivity() {
                     dialog.dismiss()
                 }
             } finally {
-                inputStream?.close()
                 outputStream?.close()
-                connection?.disconnect()
                 progressHandler.removeCallbacksAndMessages(null)
             }
         }.start()
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     private fun showUpdateDialog(title: String, message: String, isForced: Boolean, downloadUrl: String) {
-        val dialogView = layoutInflater.inflate(R.layout.activity_update, null)
+        val useMaterial = sharedPref.getBoolean("use_material", defaultUseMaterial())
+        val layoutRes = if (useMaterial) R.layout.activity_update_material else R.layout.activity_update_legacy
+
+        val dialogView = layoutInflater.inflate(layoutRes, null)
         downloadProgressBar = dialogView.findViewById<ProgressBar>(R.id.download_progress)
             ?: throw IllegalStateException(getString(R.string.progress_bar_not_found))
-        val progressContainer = dialogView.findViewById<LinearLayout>(R.id.progress_container)
+        dialogView.findViewById<LinearLayout>(R.id.progress_container)
             ?: throw IllegalStateException(getString(R.string.progress_container_not_found))
-        val progressText = dialogView.findViewById<TextView>(R.id.progress_text)
+        dialogView.findViewById<TextView>(R.id.progress_text)
             ?: throw IllegalStateException(getString(R.string.progress_text_not_found))
 
         dialogView.findViewById<TextView>(R.id.update_title).text = title
@@ -388,19 +460,52 @@ class MainActivity : AppCompatActivity() {
                 attributes = params
                 decorView.setPadding(0, 0, 0, 0)
             }
-        } catch (e: Exception) {
+        } catch (@Suppress("UNUSED_PARAMETER") e: Exception) {
             runOnUiThread {
                 Toast.makeText(this, getString(R.string.update_dialog_error), Toast.LENGTH_LONG).show()
             }
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        Glide.with(this).clear(binding.logo)
-        stopAllSpammers()
-        progressHandler.removeCallbacksAndMessages(null)
+    private fun defaultUseMaterial(): Boolean {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
     }
+
+    private var isBetaDialogShownInSession = false
+
+
+    override fun onResume() {
+        super.onResume()
+
+        resetAllSpammerButtonsUi()
+        restoreSpammerUiState()
+        updateLogoAnimation()
+    }
+
+
+    override fun onDestroy() {
+        if (isChangingConfigurations) {
+            Log.d("BLESpam", "onDestroy: configuration change, keeping spammers running")
+        }
+
+        blinkHandler.removeCallbacksAndMessages(null)
+        progressHandler.removeCallbacksAndMessages(null)
+
+        try {
+            if (!isDestroyed && !isFinishing) {
+                Glide.with(this).clear(logo)
+            } else {
+                Glide.with(applicationContext).clear(logo)
+            }
+        } catch (e: Exception) {
+            Log.e("BLESpam", "Error clearing Glide in onDestroy", e)
+        }
+
+        super.onDestroy()
+    }
+
+
+
 
     @SuppressLint("StringFormatInvalid")
     private fun installApk(uri: Uri) {
@@ -440,6 +545,7 @@ class MainActivity : AppCompatActivity() {
             )
             Log.d("BLESpam", "FileProvider URI: $apkUri, File path: ${externalApkFile.absolutePath}")
 
+            @Suppress("DEPRECATION")
             val installIntent = Intent(Intent.ACTION_INSTALL_PACKAGE).apply {
                 setDataAndType(apkUri, "application/vnd.android.package-archive")
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
@@ -488,32 +594,108 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkBluetoothEnabled(): Boolean {
-        val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
-        return bluetoothAdapter?.isEnabled == true
+        val bluetoothAdapter = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val bluetoothManager = getSystemService(android.bluetooth.BluetoothManager::class.java)
+            bluetoothManager?.adapter
+        } else {
+            @Suppress("DEPRECATION")
+            BluetoothAdapter.getDefaultAdapter()
+        }
+        if (bluetoothAdapter == null) {
+            Toast.makeText(this, getString(R.string.bluetooth_not_supported), Toast.LENGTH_SHORT).show()
+            return false
+        }
+        return bluetoothAdapter.isEnabled
+    }
+
+    private fun isBluetoothEnabledSilent(): Boolean {
+        val bluetoothAdapter = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val bluetoothManager = getSystemService(android.bluetooth.BluetoothManager::class.java)
+            bluetoothManager?.adapter
+        } else {
+            @Suppress("DEPRECATION")
+            BluetoothAdapter.getDefaultAdapter()
+        }
+        return bluetoothAdapter?.isEnabled ?: false
+    }
+
+    private fun hasNotificationPermission(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+        } else {
+            true
+        }
+    }
+
+    private fun canSpammerWork(): Boolean {
+        val hasNotification = hasNotificationPermission()
+        val hasBluetooth = isBluetoothEnabledSilent()
+
+        return hasNotification || hasBluetooth
+    }
+
+    private fun vibrate(pattern: LongArray) {
+        val isVibrationEnabled = sharedPref.getBoolean("vibration_enabled", true)
+        if (!isVibrationEnabled || vibrator == null) return
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val effect = VibrationEffect.createWaveform(pattern, -1)
+                vibrator?.vibrate(effect)
+            } else {
+                @Suppress("DEPRECATION")
+                vibrator?.vibrate(pattern, -1)
+            }
+        } catch (e: Exception) {
+            Log.w("BLESpam", "Vibration failed", e)
+        }
+    }
+
+    private fun vibrateStart() {
+        vibrate(longArrayOf(0, 50, 50, 50))
+    }
+
+    private fun vibrateStop() {
+        vibrate(longArrayOf(0, 30))
     }
 
     private fun promptToEnableBluetooth() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
-            !hasPermission(Manifest.permission.BLUETOOTH_CONNECT)
-        ) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.BLUETOOTH_CONNECT),
-                2
-            )
-            return
-        }
-        if (!hasPermission(Manifest.permission.BLUETOOTH)) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.BLUETOOTH),
-                2
-            )
+        if (isBluetoothRequestPending) {
+            Log.d("BLESpam", "Bluetooth request already pending")
             return
         }
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (!hasPermission(Manifest.permission.BLUETOOTH_CONNECT)) {
+                Log.d("BLESpam", "Requesting BLUETOOTH_CONNECT permission")
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.BLUETOOTH_CONNECT),
+                    2
+                )
+                return
+            }
+        } else {
+            if (!hasPermission(Manifest.permission.BLUETOOTH)) {
+                Log.d("BLESpam", "Requesting BLUETOOTH permission")
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.BLUETOOTH),
+                    2
+                )
+                return
+            }
+        }
+
+        Log.d("BLESpam", "Launching Bluetooth enable request")
+        isBluetoothRequestPending = true
         val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-        enableBluetoothLauncher.launch(enableBtIntent)
+        try {
+            enableBluetoothLauncher.launch(enableBtIntent)
+        } catch (e: Exception) {
+            Log.e("BLESpam", "Failed to launch Bluetooth enable request", e)
+            isBluetoothRequestPending = false
+            Toast.makeText(this, getString(R.string.bluetootherror), Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun hasPermission(permission: String): Boolean {
@@ -524,123 +706,586 @@ class MainActivity : AppCompatActivity() {
         if (isFinishing || isDestroyed) return
 
         val isAnimationEnabled = sharedPref.getBoolean("logo_animation", false)
-        val isAnySpammerActive = spammerList.any { it.isSpamming }
+        val isAnySpammerActive = SpamService.getActiveSpammers().isNotEmpty()
 
-        if (isAnimationEnabled && isAnySpammerActive) {
-            Glide.with(this)
-                .load(R.drawable.anim)
-                .into(binding.logo)
-        } else {
-            Glide.with(this)
-                .load(R.drawable.logo)
-                .into(binding.logo)
+        try {
+            if (isAnimationEnabled && isAnySpammerActive) {
+                val isDarkTheme = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+                val animResource = if (isDarkTheme) {
+                    R.drawable.anim_frames_white
+                } else {
+                    R.drawable.anim_frames_black
+                }
+
+                if (logo.drawable !is AnimationDrawable || logo.tag != animResource) {
+                    logo.setImageResource(animResource)
+                    logo.tag = animResource
+                }
+
+                logo.post {
+                    (logo.drawable as? AnimationDrawable)?.let { anim ->
+                        if (!anim.isRunning) {
+                            anim.start()
+                        }
+                    }
+                }
+            } else {
+                (logo.drawable as? AnimationDrawable)?.stop()
+
+                if (logo.tag != "static") {
+                    logo.setImageResource(R.drawable.logo)
+                    logo.tag = "static"
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("BLESpam", "Error in updateLogoAnimation", e)
+            logo.setImageResource(R.drawable.logo)
+            logo.tag = "static"
         }
     }
 
-    private fun onClickSpamButton(spammer: Spammer, button: Button, circle: ImageView) {
-        if (!spammerList.contains(spammer)) {
-            spammerList.add(spammer)
-        }
+
+    private fun onClickSpamButton(
+        spammer: Spammer,
+        spammerName: String,
+        button: MaterialButton,
+        circle: ImageView
+    ) {
+        if (!spammerList.contains(spammer)) spammerList.add(spammer)
+
+        val useMaterial = sharedPref.getBoolean("use_material", Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+
         button.setOnClickListener {
-            if (!checkBluetoothEnabled()) {
+            val isActuallyRunning = try {
+                SpamService.isSpammerRunning(spammerName)
+            } catch (e: Exception) {
+                Log.w("BLESpam", "Failed to check spammer state: ${e.message}")
+                false
+            }
+
+            if (isActuallyRunning) {
+                try {
+                    val blinkRunnable = spammer.getBlinkRunnable()
+                    if (blinkRunnable != null) {
+                        blinkHandler.removeCallbacks(blinkRunnable)
+                        spammer.setBlinkRunnable(noOpRunnable)
+                    }
+                    SpamService.stopSpammer(this, spammerName)
+                    vibrateStop()
+
+                    circle.setImageResource(R.drawable.grey_circle)
+                    circle.visibility = View.VISIBLE
+
+                    if (useMaterial) {
+                        val strokeColor = resolveAttrColor(android.R.attr.textColorSecondary)
+                        button.backgroundTintList = ColorStateList.valueOf(Color.TRANSPARENT)
+                        try { button.setStrokeColor(ColorStateList.valueOf(strokeColor)) } catch (_: Throwable) {}
+                        button.setTextColor(strokeColor)
+                    } else {
+                        button.background = ContextCompat.getDrawable(this, R.drawable.button_white_outline)
+                        button.backgroundTintList = null
+                        button.setTextColor(ContextCompat.getColor(this, R.color.black))
+                    }
+
+                    updateLogoAnimation()
+
+                    if (SpamService.getActiveSpammers().isEmpty()) {
+                        SpamService.stopAllSpammers(this)
+                    }
+                } catch (e: Exception) {
+                    Log.e("BLESpam", "Failed to stop spammer $spammerName", e)
+                }
+                return@setOnClickListener
+            }
+
+            val hasNotification = hasNotificationPermission()
+            val hasBluetooth = checkBluetoothEnabled()
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !hasNotification) {
+                requestNotificationPermission()
+                Toast.makeText(this, getString(R.string.notifications_permission_required), Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            if (!hasBluetooth) {
                 promptToEnableBluetooth()
                 return@setOnClickListener
             }
 
-            if (!spammer.isSpamming) {
-                spammer.start()
-                circle.setImageResource(R.drawable.active_circle)
-                if (spammer.blinkRunnable == null) {
-                    spammer.blinkRunnable = startBlinking(circle, spammer, button)
-                }
-                button.backgroundTintList = ContextCompat.getColorStateList(this, R.color.orange)
-                button.setTextColor(ContextCompat.getColor(this, R.color.white))
-            } else {
-                spammer.stop()
-                circle.setImageResource(R.drawable.grey_circle)
-                button.backgroundTintList = ContextCompat.getColorStateList(this, R.color.empty)
-                button.setTextColor(ContextCompat.getColor(this, R.color.black))
+            if (!canSpammerWork()) {
+                Toast.makeText(this, getString(R.string.notifications_permission_required), Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
             }
-            updateLogoAnimation()
+
+                Handler(Looper.getMainLooper()).postDelayed({
+                    try {
+                        circle.setImageResource(R.drawable.active_circle)
+                        circle.visibility = View.VISIBLE
+
+                        if (useMaterial) {
+                            val colorPrimary = resolveAttrColor(com.google.android.material.R.attr.colorTertiary)
+                            val colorOnPrimary = resolveAttrColor(com.google.android.material.R.attr.colorOnPrimary)
+                            button.backgroundTintList = ColorStateList.valueOf(colorPrimary)
+                            try { button.setStrokeColor(ColorStateList.valueOf(colorPrimary)) } catch (_: Throwable) {}
+                            button.setTextColor(colorOnPrimary)
+                        } else {
+                            button.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.orange))
+                            button.setTextColor(ContextCompat.getColor(this, R.color.white))
+                        }
+
+                        val blinkRunnable = startBlinking(circle, spammer, button)
+                        spammer.setBlinkRunnable(blinkRunnable)
+
+                        SpamService.startSpammer(this, spammerName)
+                        vibrateStart()
+                        updateLogoAnimation()
+                        sharedPref.edit()
+                            .putBoolean("force_ui_stopped", false)
+                            .apply()
+
+                    } catch (e: Exception) {
+                        Log.e("BLESpam", "Failed to start spammer $spammerName", e)
+                        runOnUiThread {
+                            circle.setImageResource(R.drawable.grey_circle)
+                            circle.visibility = View.VISIBLE
+                            if (useMaterial) {
+                                val strokeColor = resolveAttrColor(android.R.attr.textColorSecondary)
+                                button.backgroundTintList = ColorStateList.valueOf(Color.TRANSPARENT)
+                                try { button.setStrokeColor(ColorStateList.valueOf(strokeColor)) } catch (_: Throwable) {}
+                                button.setTextColor(strokeColor)
+                            } else {
+                                button.background = ContextCompat.getDrawable(this, R.drawable.button_white_outline)
+                                button.backgroundTintList = null
+                                button.setTextColor(ContextCompat.getColor(this, R.color.black))
+                            }
+                            updateLogoAnimation()
+                        }
+                    }
+                }, 50)
         }
     }
 
-    private fun startBlinking(imageView: ImageView, spammer: Spammer, button: Button): Runnable {
-        val handler = Handler(Looper.getMainLooper())
-        val blinkRunnable: Runnable = object : Runnable {
+
+
+    private fun resolveAttrColor(@AttrRes attr: Int): Int {
+        val tv = TypedValue()
+        theme.resolveAttribute(attr, tv, true)
+        return if (tv.resourceId != 0) {
+            ContextCompat.getColor(this, tv.resourceId)
+        } else {
+            tv.data
+        }
+    }
+
+
+    private fun startBlinking(imageView: ImageView, spammer: Spammer, button: MaterialButton): Runnable {
+        imageView.setImageResource(R.drawable.active_circle)
+        imageView.visibility = View.VISIBLE
+
+        val blinkRunnable = object : Runnable {
             override fun run() {
-                if (spammer.isSpamming && !checkBluetoothEnabled()) {
-                    spammer.stop()
-                    imageView.setImageResource(R.drawable.grey_circle)
-                    button.backgroundTintList = ContextCompat.getColorStateList(this@MainActivity, R.color.empty)
-                    button.setTextColor(ContextCompat.getColor(this@MainActivity, R.color.black))
-                    Toast.makeText(this@MainActivity, getString(R.string.bluetoothoff_spammeroff), Toast.LENGTH_SHORT).show()
-                    updateLogoAnimation()
+                val spammerName = getSpammerNameForButton(button)
+                val isActuallyRunning = if (spammerName != null) {
+                    try {
+                        SpamService.isSpammerRunning(spammerName)
+                    } catch (e: Exception) {
+                        false
+                    }
+                } else {
+                    false
+                }
+
+                if (isActuallyRunning && !canSpammerWork()) {
+                    SpamService.stopSpammer(this@MainActivity, spammerName ?: "")
+                    blinkHandler.removeCallbacks(this)
+                    runOnUiThread {
+                        imageView.setImageResource(R.drawable.grey_circle)
+                        imageView.visibility = View.VISIBLE
+                        button.backgroundTintList = ContextCompat.getColorStateList(this@MainActivity, R.color.empty)
+                        button.setTextColor(ContextCompat.getColor(this@MainActivity, R.color.black))
+                        val hasNotification = hasNotificationPermission()
+                        val hasBluetooth = isBluetoothEnabledSilent()
+                        val message = when {
+                            !hasNotification && !hasBluetooth -> getString(R.string.notifications_permission_required)
+                            !hasBluetooth -> getString(R.string.bluetoothoff_spammeroff)
+                            else -> getString(R.string.notifications_permission_required)
+                        }
+                        Toast.makeText(this@MainActivity, message, Toast.LENGTH_SHORT).show()
+                        updateLogoAnimation()
+                    }
                     return
                 }
-                if (spammer.isSpamming) {
+
+                if (isActuallyRunning) {
                     imageView.visibility = if (imageView.visibility == View.VISIBLE) View.INVISIBLE else View.VISIBLE
-                    handler.postDelayed(
-                        this,
-                        if (imageView.visibility == View.VISIBLE) (Helper.delay / 10).coerceAtLeast(20).toLong()
-                        else Helper.delay.toLong()
-                    )
+
+                    val delay = if (imageView.visibility == View.VISIBLE) {
+                        (Helper.delay / 10).coerceAtLeast(20)
+                    } else {
+                        Helper.delay
+                    }
+                    blinkHandler.postDelayed(this, delay.toLong())
                 } else {
-                    imageView.visibility = View.VISIBLE
-                    handler.postDelayed(this, 200)
+                    blinkHandler.removeCallbacks(this)
+                    runOnUiThread {
+                        imageView.visibility = View.VISIBLE
+                        imageView.setImageResource(R.drawable.grey_circle)
+                    }
                 }
             }
         }
-        handler.postDelayed(blinkRunnable, 100)
+
+        blinkHandler.post(blinkRunnable)
         return blinkRunnable
     }
 
-    @RequiresApi(Build.VERSION_CODES.S)
+    private fun getSpammerNameForButton(button: MaterialButton): String? {
+        return when (button) {
+            ios17CrashButton -> "iOS Crash"
+            appleActionModalButton -> "Apple Action Modal"
+            appleDevicePopupButton -> "Apple Device Popup"
+            appleNotYourDevicePopupButton -> "Apple 'Not Your Device'"
+            vzhuhSpamButton -> "Vzhuh Spam"
+            androidFastPairButton -> "Android Fast Pair"
+            xiaomiQuickConnectButton -> "Xiaomi Quick Connect"
+            samsungEasyPairBudsButton -> "Samsung Buds"
+            samsungEasyPairWatchButton -> "Samsung Watch"
+            windowsSwiftPairButton -> "Windows Swift Pair"
+            else -> null
+        }
+    }
+
+
+
+
+    @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Применить тему из настроек ПЕРЕД super.onCreate()
-        sharedPref = getSharedPreferences("AppSettings", MODE_PRIVATE)
+        sharedPref = getSharedPreferences("AppSettings", Context.MODE_PRIVATE)
         val theme = sharedPref.getString("theme", "auto") ?: "auto"
         setAppTheme(theme)
 
+        val useMaterial = sharedPref.getBoolean(
+            "use_material",
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+        )
+
         super.onCreate(savedInstanceState)
+        setContentView(
+            if (useMaterial) R.layout.activity_main_material
+            else R.layout.activity_main_legacy
+        )
 
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        initializeViews()
 
-        val bugButton: ImageView = findViewById(R.id.settingsButton)
-        // Теперь проверяем текущую тему приложения, а не системную
-        val isDarkTheme = isAppInDarkTheme()
-        // Set the appropriate icon based on the theme
-        bugButton.setImageResource(if (isDarkTheme) R.mipmap.ic_menu_night else R.mipmap.ic_menu)
+        val bugButton = findViewById<ImageView>(R.id.settingsButton)
         bugButton.setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
 
-        val socialLink = findViewById<TextView>(R.id.socialLink)
-        socialLink.paintFlags = socialLink.paintFlags or Paint.UNDERLINE_TEXT_FLAG
+        val requiredPermissions = getRequiredPermissions()
+        val permissionsToRequest = requiredPermissions.filter {
+            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
+        }.toTypedArray()
 
-        if (!hasPermission(Manifest.permission.BLUETOOTH) ||
-            !hasPermission(Manifest.permission.BLUETOOTH_ADMIN) ||
-            (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !hasPermission(Manifest.permission.BLUETOOTH_ADVERTISE))
-        ) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(
-                    Manifest.permission.BLUETOOTH,
-                    Manifest.permission.BLUETOOTH_ADMIN,
-                    *if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) arrayOf(Manifest.permission.BLUETOOTH_ADVERTISE) else arrayOf()
-                ),
-                1
-            )
+        if (permissionsToRequest.isNotEmpty()) {
+            Log.d("BLESpam", "Запрашиваем разрешения: ${permissionsToRequest.contentToString()}")
+            ActivityCompat.requestPermissions(this, permissionsToRequest, REQUEST_ALL_PERMISSIONS)
         } else {
             checkForNewVersion()
-            if (Helper.isPermissionGranted(this)) {
-                initializeSpamButtons()
-                setupDelayButtons()
-            }
+            completeInitialization()
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requestNotificationPermission()
+        }
+
+        Handler(Looper.getMainLooper()).postDelayed({
+        }, 500)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+
+        if (intent.action == StopSpamReceiver.ACTION_UI_STOPPED) {
+            Log.d("BLESpam", "onNewIntent: ACTION_UI_STOPPED received")
+
+            Handler(Looper.getMainLooper()).postDelayed({
+                forceResetAllUI()
+            }, 100)
         }
     }
 
+    private fun forceResetAllUI() {
+        Log.d("BLESpam", "forceResetAllUI: starting")
+
+        blinkHandler.removeCallbacksAndMessages(null)
+
+        spammerList.forEach {
+            it.getBlinkRunnable()?.let { r -> blinkHandler.removeCallbacks(r) }
+            it.setBlinkRunnable(null)
+        }
+        spammerList.clear()
+
+        val useMaterial = sharedPref.getBoolean("use_material", Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+
+        val buttons = listOf(
+            ios17CrashButton to ios17CrashCircle,
+            appleActionModalButton to appleActionModalCircle,
+            appleDevicePopupButton to appleDevicePopupCircle,
+            appleNotYourDevicePopupButton to appleNotYourDevicePopupCircle,
+            vzhuhSpamButton to vzhuhSpamCircle,
+            androidFastPairButton to androidFastPairCircle,
+            xiaomiQuickConnectButton to xiaomiQuickConnectCircle,
+            samsungEasyPairBudsButton to samsungEasyPairBudsCircle,
+            samsungEasyPairWatchButton to samsungEasyPairWatchCircle,
+            windowsSwiftPairButton to windowsSwiftPairCircle
+        )
+
+        buttons.forEach { (button, circle) ->
+            circle.setImageResource(R.drawable.grey_circle)
+            circle.visibility = View.VISIBLE
+
+            if (useMaterial) {
+                val strokeColor = resolveAttrColor(android.R.attr.textColorSecondary)
+
+                button.icon = null
+                button.backgroundTintList = ColorStateList.valueOf(Color.TRANSPARENT)
+                button.setTextColor(strokeColor)
+
+                try {
+                    button.strokeWidth = 3
+                    button.setStrokeColor(ColorStateList.valueOf(strokeColor))
+                } catch (e: Throwable) {
+                    Log.e("BLESpam", "Error setting stroke: ${e.message}")
+                }
+            } else {
+                button.background = ContextCompat.getDrawable(this, R.drawable.button_white_outline)
+                button.backgroundTintList = null
+                button.setTextColor(ContextCompat.getColor(this, R.color.black))
+            }
+        }
+
+        updateLogoAnimation()
+
+        Log.d("BLESpam", "forceResetAllUI: complete")
+    }
+
+    private fun resetButtonUI(button: MaterialButton, circle: ImageView) {
+        val useMaterial = sharedPref.getBoolean("use_material", Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+
+        circle.setImageResource(R.drawable.grey_circle)
+        circle.visibility = View.VISIBLE
+
+        if (useMaterial) {
+            val strokeColor = resolveAttrColor(android.R.attr.textColorSecondary)
+
+            button.backgroundTintList = ColorStateList.valueOf(Color.TRANSPARENT)
+            button.setTextColor(strokeColor)
+
+            try {
+                button.setStrokeColor(ColorStateList.valueOf(strokeColor))
+                button.strokeWidth = resources.getDimensionPixelSize(R.dimen.button_stroke_width).takeIf { it > 0 } ?: 3
+            } catch (_: Throwable) {}
+
+        } else {
+            button.background = ContextCompat.getDrawable(this, R.drawable.button_white_outline)
+            button.backgroundTintList = null
+            button.setTextColor(ContextCompat.getColor(this, R.color.black))
+        }
+
+        button.invalidate()
+        button.requestLayout()
+    }
+
+
+
+
+    override fun onStart() {
+        super.onStart()
+    }
+
+    override fun onStop() {
+        super.onStop()
+    }
+
+
+
+
+
+    private fun applyInactiveStyle(button: MaterialButton, circle: ImageView) {
+        val useMaterial = sharedPref.getBoolean("use_material", Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+
+        circle.setImageResource(R.drawable.grey_circle)
+        circle.visibility = View.VISIBLE
+
+        if (useMaterial) {
+            val strokeColor = resolveAttrColor(android.R.attr.textColorSecondary)
+            button.backgroundTintList = ColorStateList.valueOf(Color.TRANSPARENT)
+            try { button.setStrokeColor(ColorStateList.valueOf(strokeColor)) } catch (_: Throwable) {}
+            button.setTextColor(strokeColor)
+        } else {
+            button.background = ContextCompat.getDrawable(this, R.drawable.button_white_outline)
+            button.backgroundTintList = null
+            button.setTextColor(ContextCompat.getColor(this, R.color.black))
+        }
+    }
+
+    private fun resetAllSpammerButtonsUi() {
+        blinkHandler.removeCallbacksAndMessages(null)
+
+        spammerList.forEach {
+            it.getBlinkRunnable()?.let { r -> blinkHandler.removeCallbacks(r) }
+            it.setBlinkRunnable(null)
+        }
+        spammerList.clear()
+        applyInactiveStyle(ios17CrashButton, ios17CrashCircle)
+        applyInactiveStyle(appleActionModalButton, appleActionModalCircle)
+        applyInactiveStyle(appleDevicePopupButton, appleDevicePopupCircle)
+        applyInactiveStyle(appleNotYourDevicePopupButton, appleNotYourDevicePopupCircle)
+        applyInactiveStyle(vzhuhSpamButton, vzhuhSpamCircle)
+        applyInactiveStyle(androidFastPairButton, androidFastPairCircle)
+        applyInactiveStyle(xiaomiQuickConnectButton, xiaomiQuickConnectCircle)
+        applyInactiveStyle(samsungEasyPairBudsButton, samsungEasyPairBudsCircle)
+        applyInactiveStyle(samsungEasyPairWatchButton, samsungEasyPairWatchCircle)
+        applyInactiveStyle(windowsSwiftPairButton, windowsSwiftPairCircle)
+
+        updateLogoAnimation()
+    }
+
+    private fun initializeViews() {
+        vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+            vibratorManager.defaultVibrator
+        } else {
+            @Suppress("DEPRECATION")
+            getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        }
+        
+        logo = findViewById(R.id.logo)
+        ios17CrashButton = findViewById(R.id.ios17CrashButton)
+        ios17CrashCircle = findViewById(R.id.ios17CrashCircle)
+        appleActionModalButton = findViewById(R.id.appleActionModalButton)
+        appleActionModalCircle = findViewById(R.id.appleActionModalCircle)
+        appleDevicePopupButton = findViewById(R.id.appleDevicePopupButton)
+        appleDevicePopupCircle = findViewById(R.id.appleDevicePopupCircle)
+        appleNotYourDevicePopupButton = findViewById(R.id.appleNotYourDevicePopupButton)
+        appleNotYourDevicePopupCircle = findViewById(R.id.appleNotYourDevicePopupCircle)
+        vzhuhSpamButton = findViewById(R.id.vzhuhSpamButton)
+        vzhuhSpamCircle = findViewById(R.id.vzhuhSpamCircle)
+        androidFastPairButton = findViewById(R.id.androidFastPairButton)
+        androidFastPairCircle = findViewById(R.id.androidFastPairCircle)
+        samsungEasyPairBudsButton = findViewById(R.id.samsungEasyPairBudsButton)
+        samsungEasyPairBudsCircle = findViewById(R.id.samsungEasyPairBudsCircle)
+        xiaomiQuickConnectButton = findViewById(R.id.XiaomiQuickConnectButton)
+        xiaomiQuickConnectCircle = findViewById(R.id.XiaomiQuickConnectCircle)
+        samsungEasyPairWatchButton = findViewById(R.id.samsungEasyPairWatchButton)
+        samsungEasyPairWatchCircle = findViewById(R.id.samsungEasyPairWatchCircle)
+        windowsSwiftPairButton = findViewById(R.id.windowsSwiftPairButton)
+        windowsSwiftPairCircle = findViewById(R.id.windowsSwiftPairCircle)
+        minusDelayButton = findViewById(R.id.minusDelayButton)
+        plusDelayButton = findViewById(R.id.plusDelayButton)
+        delayText = findViewById(R.id.delayText)
+    }
+
+    private fun getRequiredPermissions(): Array<String> {
+        val list = mutableListOf<String>()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            list.add(Manifest.permission.BLUETOOTH_ADVERTISE)
+            list.add(Manifest.permission.BLUETOOTH_CONNECT)
+            list.add(Manifest.permission.BLUETOOTH_SCAN)
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            list.add(Manifest.permission.POST_NOTIFICATIONS)
+        }
+        return list.toTypedArray()
+    }
+
+    private fun completeInitialization() {
+        if (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                Helper.isPermissionGranted(this)
+            } else {
+                ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+            }
+        ) {
+            initializeSpamButtons()
+            restoreSpammerUiState()
+            setupDelayButtons()
+
+        }
+    }
+
+    private fun restoreSpammerUiState() {
+        try {
+            val mapping = listOf(
+                Triple("iOS Crash", ios17CrashButton to ios17CrashCircle, { ContinuitySpam(ContinuityType.ACTION, true) }),
+                Triple("Apple Action Modal", appleActionModalButton to appleActionModalCircle, { ContinuitySpam(ContinuityType.ACTION, false) }),
+                Triple("Apple Device Popup", appleDevicePopupButton to appleDevicePopupCircle, { ContinuitySpam(ContinuityType.DEVICE, false) }),
+                Triple("Apple 'Not Your Device'", appleNotYourDevicePopupButton to appleNotYourDevicePopupCircle, { ContinuitySpam(ContinuityType.NOTYOURDEVICE, false) }),
+                Triple("Vzhuh Spam", vzhuhSpamButton to vzhuhSpamCircle, { VzhuhSpam() }),
+                Triple("Android Fast Pair", androidFastPairButton to androidFastPairCircle, { FastPairSpam() }),
+                Triple("Xiaomi Quick Connect", xiaomiQuickConnectButton to xiaomiQuickConnectCircle, { XiaomiQuickConnect() }),
+                Triple("Samsung Buds", samsungEasyPairBudsButton to samsungEasyPairBudsCircle, { EasySetupSpam(EasySetupDevice.type.BUDS) }),
+                Triple("Samsung Watch", samsungEasyPairWatchButton to samsungEasyPairWatchCircle, { EasySetupSpam(EasySetupDevice.type.WATCH) }),
+                Triple("Windows Swift Pair", windowsSwiftPairButton to windowsSwiftPairCircle, { SwiftPairSpam() })
+            )
+
+            for (item in mapping) {
+                val (name, views, factory) = item
+                val (button, circle) = views
+
+                val isRunning = try {
+                    SpamService.isSpammerRunning(name)
+                } catch (e: Exception) {
+                    Log.w("BLESpam", "isSpammerRunning error for $name: ${e.message}")
+                    false
+                }
+
+                if (isRunning) {
+                    val spammer = try {
+                        factory.invoke()
+                    } catch (e: Exception) {
+                        Log.e("BLESpam", "Failed to create spammer $name", e)
+                        continue
+                    }
+
+                    if (!spammerList.contains(spammer)) spammerList.add(spammer)
+
+                    runOnUiThread {
+                        circle.setImageResource(R.drawable.active_circle)
+                        circle.visibility = View.VISIBLE
+
+                        val useMaterial = sharedPref.getBoolean("use_material", Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+                        if (useMaterial) {
+                            val colorPrimary = resolveAttrColor(com.google.android.material.R.attr.colorTertiary)
+                            val colorOnPrimary = resolveAttrColor(com.google.android.material.R.attr.colorOnPrimary)
+                            button.backgroundTintList = ColorStateList.valueOf(colorPrimary)
+                            try { button.setStrokeColor(ColorStateList.valueOf(colorPrimary)) } catch (_: Throwable) {}
+                            button.setTextColor(colorOnPrimary)
+                        } else {
+                            button.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.orange))
+                            button.setTextColor(ContextCompat.getColor(this, R.color.white))
+                        }
+
+                        val blink = startBlinking(circle, spammer, button)
+                        spammer.setBlinkRunnable(blink)
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("BLESpam", "restoreSpammerUiState failed", e)
+        }
+    }
+
+    private fun requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 4)
+            }
+        }
+    }
 
     private fun setAppTheme(theme: String) {
         when (theme) {
@@ -671,39 +1316,41 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initializeSpamButtons() {
+
         try {
-            onClickSpamButton(ContinuitySpam(ContinuityDevice.type.ACTION, true), binding.ios17CrashButton, binding.ios17CrashCircle)
-            onClickSpamButton(ContinuitySpam(ContinuityDevice.type.ACTION, false), binding.appleActionModalButton, binding.appleActionModalCircle)
-            onClickSpamButton(ContinuitySpam(ContinuityDevice.type.DEVICE, false), binding.appleDevicePopupButton, binding.appleDevicePopupCircle)
-            onClickSpamButton(ContinuitySpam(ContinuityDevice.type.NOTYOURDEVICE, false), binding.appleNotYourDevicePopupButton, binding.appleNotYourDevicePopupCircle)
-            onClickSpamButton(FastPairSpam(), binding.androidFastPairButton, binding.androidFastPairCircle)
-            onClickSpamButton(EasySetupSpam(EasySetupDevice.type.BUDS), binding.samsungEasyPairBudsButton, binding.samsungEasyPairBudsCircle)
-            onClickSpamButton(EasySetupSpam(EasySetupDevice.type.WATCH), binding.samsungEasyPairWatchButton, binding.samsungEasyPairWatchCircle)
-            onClickSpamButton(SwiftPairSpam(), binding.windowsSwiftPairButton, binding.windowsSwiftPairCircle)
-        } catch (e: IOException) {
+            onClickSpamButton(ContinuitySpam(ContinuityType.ACTION, true), "iOS Crash", ios17CrashButton, ios17CrashCircle)
+            onClickSpamButton(ContinuitySpam(ContinuityType.ACTION, false), "Apple Action Modal", appleActionModalButton, appleActionModalCircle)
+            onClickSpamButton(ContinuitySpam(ContinuityType.DEVICE, false), "Apple Device Popup", appleDevicePopupButton, appleDevicePopupCircle)
+            onClickSpamButton(ContinuitySpam(ContinuityType.NOTYOURDEVICE, false), "Apple 'Not Your Device'", appleNotYourDevicePopupButton, appleNotYourDevicePopupCircle)
+            onClickSpamButton(VzhuhSpam(), "Vzhuh Spam", vzhuhSpamButton, vzhuhSpamCircle)
+            onClickSpamButton(FastPairSpam(), "Android Fast Pair", androidFastPairButton, androidFastPairCircle)
+            onClickSpamButton(XiaomiQuickConnect(), "Xiaomi Quick Connect", xiaomiQuickConnectButton, xiaomiQuickConnectCircle)
+            onClickSpamButton(EasySetupSpam(EasySetupDevice.type.BUDS), "Samsung Buds", samsungEasyPairBudsButton, samsungEasyPairBudsCircle)
+            onClickSpamButton(EasySetupSpam(EasySetupDevice.type.WATCH), "Samsung Watch", samsungEasyPairWatchButton, samsungEasyPairWatchCircle)
+            onClickSpamButton(SwiftPairSpam(), "Windows Swift Pair", windowsSwiftPairButton, windowsSwiftPairCircle)
+        } catch (@Suppress("UNUSED_PARAMETER") e: IOException) {
             Toast.makeText(this, getString(R.string.swiftpair), Toast.LENGTH_SHORT).show()
         }
     }
 
     private fun setupDelayButtons() {
-        binding.minusDelayButton.setOnClickListener {
+        minusDelayButton.setOnClickListener {
             val i = Helper.delays.indexOf(Helper.delay)
             if (i > 0) {
                 Helper.delay = Helper.delays[i - 1]
-                binding.delayText.text = getString(R.string.delay_text, Helper.delay)
+                delayText.text = getString(R.string.delay_text, Helper.delay)
             }
         }
-
-        binding.plusDelayButton.setOnClickListener {
+        plusDelayButton.setOnClickListener {
             val i = Helper.delays.indexOf(Helper.delay)
             if (i < Helper.delays.size - 1) {
                 Helper.delay = Helper.delays[i + 1]
-                binding.delayText.text = getString(R.string.delay_text, Helper.delay)
+                delayText.text = getString(R.string.delay_text, Helper.delay)
             }
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.S)
+    @RequiresApi(Build.VERSION_CODES.M)
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -711,35 +1358,71 @@ class MainActivity : AppCompatActivity() {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         when (requestCode) {
-            1 -> {
-                if (grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
-                    checkForNewVersion()
-                    if (Helper.isPermissionGranted(this)) {
-                        initializeSpamButtons()
-                        setupDelayButtons()
+            REQUEST_ALL_PERMISSIONS -> {
+                val deniedPermissions = mutableListOf<String>()
+                permissions.forEachIndexed { index, permission ->
+                    if (grantResults.getOrNull(index) != PackageManager.PERMISSION_GRANTED) {
+                        deniedPermissions.add(permission)
                     }
+                }
+                if (deniedPermissions.isEmpty()) {
+                    Log.d("BLESpam", "Все разрешения получены.")
+                    checkForNewVersion()
+                    completeInitialization()
+                    Handler(Looper.getMainLooper()).postDelayed({
+                    }, 500)
                 } else {
-                    Toast.makeText(this, getString(R.string.permissions_denied), Toast.LENGTH_LONG).show()
+                    Log.w("BLESpam", "Отклонены следующие разрешения: ${deniedPermissions.joinToString(", ")}")
+                    Toast.makeText(
+                        this,
+                        if (deniedPermissions.any { it == Manifest.permission.POST_NOTIFICATIONS }) {
+                            getString(R.string.notifications_permission_required)
+                        } else {
+                            getString(R.string.permissions_denied)
+                        },
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
             }
             2 -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    promptToEnableBluetooth()
+                    Log.d("BLESpam", "Bluetooth permission granted, checking if enabled")
+                    if (!checkBluetoothEnabled()) {
+                        Handler(Looper.getMainLooper()).postDelayed({
+                            promptToEnableBluetooth()
+                        }, 200)
+                    }
                 } else {
-                    Toast.makeText(this, getString(R.string.bluetooth_permission_denied), Toast.LENGTH_LONG).show()
+                    Log.w("BLESpam", "Bluetooth permission denied")
+                    Toast.makeText(this, getString(R.string.bluetooth_permission_required), Toast.LENGTH_SHORT).show()
                 }
             }
             3 -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    checkForNewVersion()
+                    Log.d("BLESpam", "Storage permission granted")
+                    Toast.makeText(this, getString(R.string.storage_permission_granted), Toast.LENGTH_SHORT).show()
                 } else {
-                    Toast.makeText(this, getString(R.string.storage_permission_denied), Toast.LENGTH_LONG).show()
+                    Log.w("BLESpam", "Storage permission denied")
+                    Toast.makeText(this, getString(R.string.storage_permission_denied), Toast.LENGTH_SHORT).show()
+                }
+            }
+            4 -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Log.d("BLESpam", "Notification permission granted")
+                    restoreSpammerUiState()
+                } else {
+                    Log.w("BLESpam", "Notification permission denied")
+                    Toast.makeText(this, getString(R.string.notifications_permission_denied), Toast.LENGTH_SHORT).show()
+                    if (!canSpammerWork()) {
+                        SpamService.stopAllSpammers(this)
+                        updateLogoAnimation()
+                    }
                 }
             }
         }
     }
 
     companion object {
-        private const val INSTALL_PERMISSION_REQUEST_CODE = 1001
+        private const val REQUEST_ALL_PERMISSIONS = 100
     }
 }
