@@ -1,31 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">BLE Spam</string>
     <string name="permission_granted">허용된 권한</string>
     <string name="permission_required">필요한 권한</string>
-    <string name="ok">ok</string>
-    <string name="samsung_easypair_watch">Samsung EasyPair Watch</string>
-    <string name="windows_swiftpair">Windows SwiftPair</string>
-    <string name="samsung_easypair_buds">Samsung EasyPair Buds</string>
-    <string name="android_fastpair">Android FastPair</string>
-    <string name="apple_device_popup">Device Popup</string>
-    <string name="apple_notyour_device_popup">Not Your Device Popup</string>
-    <string name="apple_action_modal">Action Modal</string>
-    <string name="ios_17_crash">iOS 17 Crash</string>
-    <string name="ios_title">iOS</string>
-    <string name="android_title">Android and Samsung</string>
-    <string name="windows_title">Windows</string>
     <string name="thanks_to_willy_jl_spooks4576_and_ecto_1a">감사합니다 @Willy-JL, @Spooks4576, @ECTO-1A</string>
     <string name="dev_by_tutozz_and_ars3nb">개발자 @tutozz, @ars3nb(@ars2nb)</string>
-    <string name="todo">TODO</string>
-    <string name="plus">+</string>
-    <string name="minus">-</string>
-    <string name="blink_indicator">Blink Indicator</string>
-    <string name="_20ms">20ms</string>
     <string name="update_required_title">업데이트 필요</string>
     <string name="update_available_title">업데이트 가능</string>
-    <string name="update_message">사용 중인 버전이 오래되었습니다. %1$s로 업데이트하세요.\n\n새로운 기능:\n%2$s</string>
-    <string name="update_available_message">새 버전: %1$s\n\n새 기능:\n%2$s</string>
+    <string name="update_message">사용 중인 버전이 오래되었습니다. %1$s로 업데이트하세요.\n\n새로운 기능: \n%2$s</string>
+    <string name="update_available_message">새 버전: %1$s\n\n새 기능: \n%2$s</string>
     <string name="update_button">업데이트</string>
     <string name="later_button">나중에</string>
     <string name="update_check_failed">업데이트 확인에 실패했습니다</string>
@@ -87,14 +69,12 @@
         <string name="download_title">BLE Spam 업데이트</string>
         <string name="download_description">버전 %1$s 다운로드 중</string>
         <string name="progress_text">%1$d%% (%2$d KB/s)</string>
-        <string name="delay_text">%1$d밀리초</string>
     <string name="download_paused">다운로드 일시 중지</string>
     <string name="download_pending">다운로드 보류 중</string>
     <string name="invalid_file_path">잘못된 파일 경로</string>
     <string name="unsupported_uri_scheme">지원되지 않는 URI 체계</string>
     <string name="installation_error">설치 준비 중인 오류입니다: 1$s</string>
     <string name="blocked_version_message">사용 중인 응용 프로그램 버전(%1$s)이 잠겼습니다. 응용 프로그램을 최신 버전으로 업데이트하십시오.\n\n\n\n릴리즈 노트: 2$s</string>
-    <string name="storage_permission_denied">저장소 권한이 부여되지 않았습니다</string>
     <string name="bluetooth_permission_denied">블루투스 권한이 부여되지 않았습니다</string>
     <string name="permissions_denied">권한이 부여되지 않았습니다</string>
     <string name="no_browser_found">찾은 브라우저가 없습니다</string>
@@ -108,4 +88,25 @@
     <string name="unknown_command">알 수 없는 명령어</string>
     <string name="spammer_started">스팸 발송자 %s 시작됨</string>
     <string name="spammer_not_found">스팸 발송자 찾을 수 없음</string>
+    <string name="connection_error_generic">버그 보고서를 전송하지 못했습니다</string>
+    <string name="server_error_generic">버그 보고서를 전송하지 못했습니다</string>
+    <string name="notifications_permission_required">알림 권한이 필요합니다</string>
+    <string name="bluetooth_permission_required">블루투스 권한이 필요합니다</string>
+    <string name="storage_permission_granted">저장소 권한이 부여되었습니다</string>
+    <string name="storage_permission_denied">저장소 권한이 거부되었습니다</string>
+    <string name="notifications_permission_denied">알림 권한이 거부되었습니다</string>
+    <string name="bluetooth_not_supported">블루투스가 지원되지 않습니다</string>
+    <string name="settings">설정\n</string>
+    <string name="ble_spam_notification_no_spammers">활성 스패머 없음</string>
+    <string name="ble_spam_notification_active_one">활성: %1$s</string>
+    <string name="ble_spam_notification_title_idle">BLE Spam</string>
+    <string name="ble_spam_notification_title_one">BLE Spam 활성화됨</string>
+    <plurals name="ble_spam_notification_title_many">
+        <item quantity="other">BLE Spam (%d개 활성)</item>
+    </plurals>
+    <string name="ble_spam_notification_action_stop">중지</string>
+    <string name="ble_spam_channel_name">BLE Spam 상태</string>
+    <string name="ble_spam_channel_description">BLE Spam 작동 상태</string>
+
+
 </resources>

@@ -1,31 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">BLE Spam</string>
     <string name="permission_granted">許可された</string>
     <string name="permission_required">許可が必要です</string>
-    <string name="ok">ok</string>
-    <string name="samsung_easypair_watch">Samsung EasyPair Watch</string>
-    <string name="windows_swiftpair">Windows SwiftPair</string>
-    <string name="samsung_easypair_buds">Samsung EasyPair Buds</string>
-    <string name="android_fastpair">Android FastPair</string>
-    <string name="apple_device_popup">Device Popup</string>
-    <string name="apple_notyour_device_popup">Not Your Device Popup</string>
-    <string name="apple_action_modal">Action Modal</string>
-    <string name="ios_17_crash">iOS 17 Crash</string>
-    <string name="ios_title">iOS</string>
-    <string name="android_title">Android and Samsung</string>
-    <string name="windows_title">Windows</string>
     <string name="thanks_to_willy_jl_spooks4576_and_ecto_1a">Willy-JL、@Spooks4576、@ECTO-1Aに感謝します</string>
     <string name="dev_by_tutozz_and_ars3nb">@tutozz, @ars3nb(@ars2nb) による開発</string>
-    <string name="todo">TODO</string>
-    <string name="plus">+</string>
-    <string name="minus">-</string>
-    <string name="blink_indicator">Blink Indicator</string>
-    <string name="_20ms">20ms</string>
     <string name="update_required_title">更新が必要です</string>
     <string name="update_available_title">"アップデート可能 "</string>
-    <string name="update_message">バージョンが古いです。%1$s にアップデートしてください。\n\n新機能:\n%2$s</string>
-    <string name="update_available_message">新しいバージョン: %1$s\n\n新機能:\n%2$s</string>
+    <string name="update_message">バージョンが古いです。%1$s にアップデートしてください。\n\n新機能: \n%2$s</string>
+    <string name="update_available_message">新しいバージョン: %1$s\n\n新機能: \n%2$s</string>
     <string name="update_button">更新する</string>
     <string name="later_button">後で</string>
     <string name="update_check_failed">更新のチェックに失敗しました</string>
@@ -87,14 +69,12 @@
         <string name="download_title">BLE Spamアップデート</string>
         <string name="download_description">バージョン%1$sをダウンロード中</string>
         <string name="progress_text">%1$d%%（%2$d KB/s）</string>
-        <string name="delay_text">%1$dミリ秒</string>
     <string name="download_paused">Download Paused</string>
     <string name="download_pending">Download Pending</string>
     <string name="invalid_file_path">Invalid file path</string>
     <string name="unsupported_uri_scheme">Unsupported URI scheme</string>
     <string name="installation_error">Error preparing installation： %1$s</string>
     <string name="blocked_version_message">アプリケーションのバージョン (%1$s) がロックされています。アプリケーションを最新バージョンに更新してください： %2$s</string>
-    <string name="storage_permission_denied">ストレージへの権限が付与されていません</string>
     <string name="bluetooth_permission_denied">Bluetoothの権限が付与されていません</string>
     <string name="permissions_denied">権限が付与されていません</string>
     <string name="no_browser_found">ブラウザが見つかりません</string>
@@ -108,4 +88,25 @@
     <string name="unknown_command">不明なコマンド</string>
     <string name="spammer_started">スパマー %s が開始されました</string>
     <string name="spammer_not_found">スパマーが見つかりません</string>
+    <string name="connection_error_generic">バグ報告の送信に失敗しました</string>
+    <string name="server_error_generic">バグ報告の送信に失敗しました</string>
+    <string name="notifications_permission_required">通知の許可が必要です</string>
+    <string name="bluetooth_permission_required">Bluetoothの許可が必要です</string>
+    <string name="storage_permission_granted">ストレージの許可が付与されました</string>
+    <string name="storage_permission_denied">ストレージの許可が拒否されました</string>
+    <string name="notifications_permission_denied">通知の許可が拒否されました</string>
+    <string name="bluetooth_not_supported">Bluetoothはサポートされていません</string>
+    <string name="settings">設定\n</string>
+    <string name="ble_spam_notification_no_spammers">アクティブなスパマーはありません</string>
+    <string name="ble_spam_notification_active_one">アクティブ: %1$s</string>
+    <string name="ble_spam_notification_title_idle">BLE Spam</string>
+    <string name="ble_spam_notification_title_one">BLE Spamが有効です</string>
+    <plurals name="ble_spam_notification_title_many">
+        <item quantity="other">BLE Spam（%d個アクティブ）</item>
+    </plurals>
+    <string name="ble_spam_notification_action_stop">停止</string>
+    <string name="ble_spam_channel_name">BLE Spamステータス</string>
+    <string name="ble_spam_channel_description">BLE Spam動作ステータス</string>
+
+
 </resources>

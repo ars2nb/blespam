@@ -1,31 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">BLE Spam</string>
     <string name="permission_granted">Erlaubnis erteilt</string>
     <string name="permission_required">Erlaubnis erforderlich</string>
-    <string name="ok">ok</string>
-    <string name="samsung_easypair_watch">Samsung EasyPair Watch</string>
-    <string name="windows_swiftpair">Windows SwiftPair</string>
-    <string name="samsung_easypair_buds">Samsung EasyPair Buds</string>
-    <string name="android_fastpair">Android FastPair</string>
-    <string name="apple_device_popup">Device Popup</string>
-    <string name="apple_notyour_device_popup">Not Your Device Popup</string>
-    <string name="apple_action_modal">Action Modal</string>
-    <string name="ios_17_crash">iOS 17 Crash</string>
-    <string name="ios_title">iOS</string>
-    <string name="android_title">Android and Samsung</string>
-    <string name="windows_title">Windows</string>
     <string name="thanks_to_willy_jl_spooks4576_and_ecto_1a">Dank an @Willy-JL, @Spooks4576, @ECTO-1A</string>
     <string name="dev_by_tutozz_and_ars3nb">Dev von @tutozz, @ars3nb(@ars2nb)</string>
-    <string name="todo">TODO</string>
-    <string name="plus">+</string>
-    <string name="minus">-</string>
-    <string name="blink_indicator">Blink Indicator</string>
-    <string name="_20ms">20ms</string>
     <string name="update_required_title">Update erforderlich</string>
     <string name="update_available_title">"Update verfügbar "</string>
-    <string name="update_message">Ihre Version ist veraltet. Bitte aktualisieren Sie auf %1$s&#10;&#10;What\'s New:&#10;%2$s</string>
-    <string name="update_available_message">Neue Version: %1$s&#10;&#10;What\'s New:&#10;%2$s</string>
+    <string name="update_message">Ihre Version ist veraltet. Bitte aktualisieren Sie auf %1$s\n\nWhat\'s New: \n%2$s</string>
+    <string name="update_available_message">Neue Version: %1$s\n\nWhat\'s New: \n%2$s</string>
     <string name="update_button">Aktualisieren</string>
     <string name="later_button">Später</string>
     <string name="update_check_failed">Fehlgeschlagene Prüfung auf Updates</string>
@@ -87,20 +69,18 @@
         <string name="download_title">BLE Spam Update</string>
         <string name="download_description">Version %1$s wird heruntergeladen</string>
         <string name="progress_text">%1$d%% (%2$d KB/s)</string>
-        <string name="delay_text">%1$d ms</string>
     <string name="download_paused">Download Paused</string>
     <string name="download_pending">Download Pending</string>
     <string name="invalid_file_path">Ungültiger Dateipfad</string>
     <string name="unsupported_uri_scheme">Unterstütztes URI-Schema</string>
     <string name="installation_error">Fehler beim Vorbereiten der Installation: %1$s</string>
     <string name="blocked_version_message">Ihre Anwendungsversion (%1$s) ist gesperrt. Bitte aktualisieren Sie die Anwendung auf die neueste Version.\n\n\n\nRelease Notes: %2$s</string>
-    <string name="storage_permission_denied">Zugang zum Speicher ist nicht gewährt</string>
     <string name="bluetooth_permission_denied">Bluetooth-Zugang ist nicht gewährt</string>
     <string name="permissions_denied">Zugang ist nicht gewährt</string>
     <string name="no_browser_found">Keine Browser gefunden</string>
     <string name="save">Speichern</string>
     <string name="cooldown_error">Bitte warten Sie %d Sekunden, bevor Sie einen weiteren Bericht senden.</string>
-    <string name="theme">Тема</string>
+    <string name="theme">Thema</string>
     <string name="theme_auto">Auto (Gerätethema)</string>
     <string name="theme_light">Hell</string>
     <string name="theme_dark">Dunkel</string>
@@ -108,4 +88,25 @@
     <string name="unknown_command">Unbekannter Befehl</string>
     <string name="spammer_started">Spammer %s gestartet</string>
     <string name="spammer_not_found">Spammer nicht gefunden</string>
+    <string name="connection_error_generic">Fehler beim Senden des Fehlerberichts</string>
+    <string name="server_error_generic">Fehler beim Senden des Fehlerberichts</string>
+    <string name="notifications_permission_required">Benachrichtigungsberechtigung erforderlich</string>
+    <string name="bluetooth_permission_required">Bluetooth-Berechtigung erforderlich</string>
+    <string name="storage_permission_granted">Speicherberechtigung erteilt</string>
+    <string name="storage_permission_denied">Speicherberechtigung verweigert</string>
+    <string name="notifications_permission_denied">Benachrichtigungsberechtigung verweigert</string>
+    <string name="bluetooth_not_supported">Bluetooth nicht unterstützt</string>
+    <string name="settings">Einstellungen\n</string>
+    <string name="ble_spam_notification_no_spammers">Keine aktiven Spammer</string>
+    <string name="ble_spam_notification_active_one">Aktiv: %1$s</string>
+    <string name="ble_spam_notification_title_idle">BLE Spam</string>
+    <string name="ble_spam_notification_title_one">BLE Spam aktiviert</string>
+    <plurals name="ble_spam_notification_title_many">
+        <item quantity="one">BLE Spam (%d aktiv)</item>
+        <item quantity="other">BLE Spam (%d aktiv)</item>
+    </plurals>
+    <string name="ble_spam_notification_action_stop">Stoppen</string>
+    <string name="ble_spam_channel_name">BLE Spam Status</string>
+    <string name="ble_spam_channel_description">BLE Spam Betriebsstatus</string>
+
 </resources>

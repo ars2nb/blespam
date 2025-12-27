@@ -1,31 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="app_name">BLE Spam</string>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name" translatable="false">BLE Spam</string>
     <string name="permission_granted">Permission granted</string>
     <string name="permission_required">Permission required</string>
-    <string name="ok">ok</string>
-    <string name="samsung_easypair_watch">Samsung EasyPair Watch</string>
-    <string name="windows_swiftpair">Windows SwiftPair</string>
-    <string name="samsung_easypair_buds">Samsung EasyPair Buds</string>
-    <string name="android_fastpair">Android FastPair</string>
-    <string name="apple_device_popup">Device Popup</string>
-    <string name="apple_notyour_device_popup">Not Your Device Popup</string>
-    <string name="apple_action_modal">Action Modal</string>
-    <string name="ios_17_crash">iOS 17 Crash</string>
-    <string name="ios_title">iOS</string>
-    <string name="android_title">Android and Samsung</string>
-    <string name="windows_title">Windows</string>
+    <string name="ok" translatable="false">ok</string>
+    <string name="samsung_easypair_watch" translatable="false">Samsung EasyPair Watch</string>
+    <string name="windows_swiftpair" translatable="false">Windows SwiftPair</string>
+    <string name="samsung_easypair_buds" translatable="false">Samsung EasyPair Buds</string>
+    <string name="android_fastpair" translatable="false">Android FastPair</string>
+    <string name="apple_device_popup" translatable="false">Device Popup</string>
+    <string name="apple_notyour_device_popup" translatable="false">Not Your Device Popup</string>
+    <string name="vzhuh_popup">Vzhuh (Volna)</string>
+    <string name="apple_action_modal" translatable="false">Action Modal</string>
+    <string name="ios_17_crash" translatable="false">iOS 17 Crash</string>
+    <string name="ios_title" translatable="false">iOS</string>
+    <string name="android_title" translatable="false">Android and Samsung</string>
+    <string name="windows_title" translatable="false">Windows</string>
     <string name="thanks_to_willy_jl_spooks4576_and_ecto_1a">Thanks to @Willy-JL, @Spooks4576, @ECTO-1A</string>
     <string name="dev_by_tutozz_and_ars3nb">Dev by @tutozz, @ars3nb(@ars2nb)</string>
-    <string name="todo">TODO</string>
-    <string name="plus">+</string>
-    <string name="minus">-</string>
-    <string name="blink_indicator">Blink Indicator</string>
-    <string name="_20ms">20ms</string>
+    <string name="todo" translatable="false">TODO</string>
+    <string name="plus" translatable="false">+</string>
+    <string name="minus" translatable="false">-</string>
+    <string name="blink_indicator" translatable="false">Blink Indicator</string>
     <string name="update_required_title">Update Required</string>
     <string name="update_available_title">Update Available</string>
     <string name="update_message">Your version is outdated. Please update to %1$s\n\nWhat\'s New:\n%2$s</string>
-    <string name="update_available_message">New version: %1$s\n\nWhat\'s New:\n%2$s</string>
+    <string name="update_available_message">New version: %1$s\n\nWhat\'s New: \n%2$s</string>
     <string name="update_button">Update</string>
     <string name="later_button">Later</string>
     <string name="update_check_failed">Failed to check for updates</string>
@@ -47,27 +47,47 @@
     <string name="bug_report">Bug Report</string>
     <string name="please_wait">Please wait before the next sending</string>
     <string name="app_version">Version: %s</string>
-    <string-array name="available_language_names">
+    <string-array name="available_language_names" tools:ignore="InconsistentArrays">
+        <item>العربية</item>
+        <item>中文</item>
+        <item>Polski</item>
+        <item>Nederlands</item>
+        <item>English</item>
+        <item>Français</item>
         <item>Deutsch</item>
-        <item>Español</item>
+        <item>हिन्दी</item>
         <item>Italiano</item>
         <item>日本語</item>
         <item>한국어</item>
+        <item>فارسی</item>
         <item>Português</item>
         <item>Русский</item>
-        <item>中文</item>
-        <item>English</item>
+        <item>Español</item>
+        <item>Türkçe</item>
+        <item>Українська</item>
+        <item>Беларуская</item>
+        <item>Қазақша</item>
     </string-array>
-    <string-array name="available_language_codes">
+    <string-array name="available_language_codes" tools:ignore="InconsistentArrays">
+        <item>ar</item>
+        <item>zh</item>
+        <item>pl</item>
+        <item>nl</item>
+        <item>en</item>
+        <item>fr</item>
         <item>de</item>
-        <item>es</item>
+        <item>hi</item>
         <item>it</item>
         <item>ja</item>
         <item>ko</item>
+        <item>fa</item>
         <item>pt</item>
         <item>ru</item>
-        <item>zh</item>
-        <item>en</item>
+        <item>es</item>
+        <item>tr</item>
+        <item>uk</item>
+        <item>be</item>
+        <item>kk</item>
     </string-array>
     <string name="lang">Language</string>
     <string name="logo_animation">Logo animation</string>
@@ -109,20 +129,19 @@
     <string name="download_title">BLE Spam Update</string>
     <string name="download_description">Downloading version %1$s</string>
     <string name="progress_text">%1$d%% (%2$d KB/s)</string>
-    <string name="delay_text">%1$dms</string>
+    <string name="delay_text" translatable="false">%1$dms</string>
     <string name="download_paused">Download Paused</string>
     <string name="download_pending">Download Pending</string>
     <string name="invalid_file_path">Invalid file path</string>
     <string name="unsupported_uri_scheme">Unsupported URI scheme</string>
     <string name="installation_error">Error preparing installation: %1$s</string>
     <string name="blocked_version_message">Your application version (%1$s) is locked. Please update the application to the latest version.\n\n\n\nRelease Notes: %2$s</string>
-    <string name="storage_permission_denied">Permission to storage is not granted</string>
     <string name="bluetooth_permission_denied">Bluetooth permission is not granted</string>
     <string name="permissions_denied">permission is not granted</string>
     <string name="no_browser_found">No browsers found</string>
     <string name="save">Save</string>
     <string name="cooldown_error">Please wait %d seconds before sending another report.</string>
-    <string name="theme">Тема</string>
+    <string name="theme">Theme</string>
     <string name="theme_auto">Auto (Device Theme)</string>
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
@@ -130,4 +149,32 @@
     <string name="unknown_command">Unknown command</string>
     <string name="spammer_started">Spammer %s started</string>
     <string name="spammer_not_found">Spammer not found</string>
+    <string name="connection_error_generic">Failed to send bug report</string>
+    <string name="server_error_generic">Failed to send bug report</string>
+    <string name="notifications_permission_required">Notification permission is required</string>
+    <string name="material_switch" translatable="false">Material Design</string>
+    <string name="xiaomiquickconnect" translatable="false">Xiaomi Quick Connect</string>
+    <string name="bluetooth_permission_required">Bluetooth permission is required</string>
+    <string name="storage_permission_granted">Storage permission granted</string>
+    <string name="storage_permission_denied">Storage permission denied</string>
+    <string name="notifications_permission_denied">Notification permission denied</string>
+    <string name="bluetooth_not_supported">Bluetooth not supported</string>
+    <string name="settings">Settings\n</string>
+    <string name="ble_spam_notification_no_spammers">No active spammers</string>
+    <string name="ble_spam_notification_active_one">Active: %1$s</string>
+    <string name="ble_spam_notification_title_idle">BLE Spam</string>
+    <string name="ble_spam_notification_title_one">BLE Spam enabled</string>
+    <plurals name="ble_spam_notification_title_many">
+        <item quantity="one">BLE Spam (%d active)</item>
+        <item quantity="few">BLE Spam (%d active)</item>
+        <item quantity="many">BLE Spam (%d active)</item>
+        <item quantity="other">BLE Spam (%d active)</item>
+    </plurals>
+    <string name="ble_spam_notification_action_stop">Stop</string>
+    <string name="ble_spam_channel_name">BLE Spam status</string>
+    <string name="ble_spam_channel_description">BLE Spam operation status</string>
+    <string name="beta_version_title">WARNING</string>
+    <string name="beta_version_message">This version of the application is intended exclusively for testing.\n\nPublication or distribution of this version on the internet is prohibited and will result in exclusion from the beta testing program.</string>
+    <string name="beta_version_close_button">Close</string>
+    <string name="beta_version_close_button_timer">Close (%1$d)</string>
 </resources>

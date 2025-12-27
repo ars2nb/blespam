@@ -1,16 +1,55 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <style name="Theme.BLESpam" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+    <style name="Theme.BLESpam" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="colorPrimary">#F9772F</item>
-        <item name="colorPrimaryVariant">#A14B1C</item>
         <item name="colorOnPrimary">@color/white</item>
-        <item name="colorSecondary">#000000</item>
-        <item name="colorSecondaryVariant">#000000</item>
+        <item name="colorPrimaryContainer">#FFE8DC</item>
+        <item name="colorOnPrimaryContainer">#2D1600</item>
+
+        <item name="colorSecondary">#77574A</item>
         <item name="colorOnSecondary">@color/white</item>
+        <item name="colorSecondaryContainer">#FFDCC9</item>
+        <item name="colorOnSecondaryContainer">#2C160C</item>
 
-        <!-- Цвет статус-бара -->
+        <item name="colorTertiary">#F9772F</item>
+        <item name="colorOnTertiary">@color/white</item>
+
+        <item name="android:colorBackground">@color/white</item>
+        <item name="colorOnBackground">@color/black</item>
+        <item name="colorSurface">@color/white</item>
+        <item name="colorOnSurface">@color/black</item>
+        <item name="colorSurfaceVariant">#F4DED4</item>
+        <item name="colorOnSurfaceVariant">#52443C</item>
+        <item name="colorOutline">#85736A</item>
+
+        <!-- Статус-бар -->
         <item name="android:statusBarColor">@color/white</item>
-
         <item name="android:windowLightStatusBar" tools:targetApi="23">true</item>
+        <item name="android:navigationBarColor">@color/white</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="27">true</item>
     </style>
+
+    <!-- Стиль кастомной кнопки -->
+    <style name="Widget.App.Button.Filled" parent="Widget.Material3.Button">
+        <item name="android:textAppearance">@style/TextAppearance.Material3.LabelLarge</item>
+        <item name="android:textColor">@color/material_on_primary</item>
+        <item name="backgroundTint">?attr/colorPrimary</item>
+        <item name="cornerRadius">8dp</item>
+        <item name="elevation">2dp</item>
+        <item name="rippleColor">@color/material_ripple_primary</item>
+    </style>
+
+    <style name="ShapeAppearance.App.SquareButton" parent="">
+        <item name="cornerSize">3dp</item>
+    </style>
+
+
+    <style name="Widget.App.ControlOutlinedButton"
+        parent="Widget.Material3.Button.OutlinedButton">
+        <item name="cornerRadius">4dp</item>
+        <item name="strokeColor">@color/black</item>
+        <item name="strokeWidth">0dp</item>
+        <item name="backgroundTint">@android:color/system_accent1_500</item>
+    </style>
+
+
 </resources>

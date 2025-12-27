@@ -1,16 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <style name="Theme.BLESpam" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+    <style name="Theme.BLESpam" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="colorPrimary">#F9772F</item>
         <item name="colorPrimaryVariant">#A14B1C</item>
-        <item name="colorOnPrimary">@color/white</item>
-        <item name="colorSecondary">#000000</item>
-        <item name="colorSecondaryVariant">#000000</item>
-        <item name="colorOnSecondary">@color/white</item>
+        <item name="colorOnPrimary">@color/black</item>
 
-        <!-- Цвет статус-бара -->
-        <item name="android:statusBarColor">@color/white</item>
+        <item name="colorSecondary">#FFFFFF</item>
+        <item name="colorSecondaryVariant">#CCCCCC</item>
+        <item name="colorOnSecondary">@color/black</item>
 
+        <item name="colorPrimaryContainer">#2A2A2A</item>
+        <item name="colorOnPrimaryContainer">#FFFFFF</item>
+        <item name="colorSecondaryContainer">#1E1E1E</item>
+        <item name="colorOnSecondaryContainer">#FFFFFF</item>
+
+        <item name="colorTertiary">#F9772F</item>
+        <item name="colorOnTertiary">@color/black</item>
+
+        <item name="android:colorBackground">#121212</item>
+        <item name="colorOnBackground">#FFFFFF</item>
+        <item name="colorSurface">#1E1E1E</item>
+        <item name="colorOnSurface">#FFFFFF</item>
+        <item name="colorSurfaceVariant">#2A2A2A</item>
+        <item name="colorOnSurfaceVariant">#CCCCCC</item>
+
+        <item name="colorOutline">#555555</item>
+
+        <item name="android:statusBarColor">#121212</item>
         <item name="android:windowLightStatusBar" tools:targetApi="23">false</item>
+        <item name="android:navigationBarColor">#121212</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
     </style>
 </resources>
